@@ -1,2 +1,60 @@
-# Carvo
-Carvo is the ultimate car customization platform and marketplace. Transform your ride with real-time visualization, parts, and book expert services. Features include interactive fluid modification, a seamless shopping experience, and dedicated dashboards for delivery and service providers to manage every aspect of your build.
+# Carvo - The Ultimate Car Customization Platform
+
+Carvo is a comprehensive marketplace and visualization platform dedicated to car enthusiasts. It allows users to customize vehicles in real-time using 3D tools, purchase parts from a vast catalog, and book professional services.
+
+## 🚀 Features
+
+- **Interactive 3D Customization**: Visualize modifications with our "Fluid Modification" and 3D viewer tools.
+- **E-Commerce Marketplace**: Browse 10,000+ products across 400+ categories.
+- **Service Booking**: Schedule mechanics and customization experts.
+- **Role-Based Dashboards**: Dedicated interfaces for:
+  - Customers
+  - Sellers
+  - Service Providers
+  - Delivery Personnel
+  - Admins
+- **Secure Authentication**: Google Login and JWT-based auth.
+- **Payment Integration**: Secure checkout with UPI support.
+
+## 🛠️ Technology Stack
+
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn-ui
+- **Backend**: Node.js, Express
+- **Database**: MySQL/MariaDB (via TypeORM)
+- **3D Graphics**: React Three Fiber / Three.js
+
+## 📦 Installation
+
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/yourusername/carvo.git](https://github.com/yourusername/carvo.git)
+    cd carvo
+    ```
+
+2.  **Install Dependencies**
+    ```bash
+    # Install frontend dependencies
+    npm install
+
+    # Install backend dependencies
+    cd server
+    npm install
+    ```
+
+3.  **Environment Setup**
+    - Create a [.env](cci:7://file:///c:/xampp/htdocs/Carvo/.env:0:0-0:0) file in the `server` directory based on [.env.example](cci:7://file:///c:/xampp/htdocs/Carvo/server/.env.example:0:0-0:0).
+    - Configure your database credentials.
+
+4.  **Run the Application**
+    ```bash
+    # Run both client and server (from root)
+    npm run dev
+    ```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
