@@ -59,7 +59,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 **Dhruv Teli**
 - **Phone**: +91 87585 41064
-- **Email**: dhruv.teli@example.com
+- **Email**: dhruvteli6019@gmail.com
 - **Role**: Lead Developer / Creator
 
 ## 📄 License
