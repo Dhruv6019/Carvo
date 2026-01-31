@@ -1,4 +1,367 @@
--- =============================================
+# Car Modification System - Entity Tables
+
+## 1. Admin Users Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | admin_id | INT(11) | Primary Key | Unique Admin ID |
+| 2 | name | VARCHAR(255) | Not Null | Admin name |
+| 3 | email | VARCHAR(255) | Unique, Not Null | Admin email address |
+| 4 | password_hash | VARCHAR(255) | Not Null | Hashed password |
+| 5 | phone | VARCHAR(20) | Null | Admin phone number |
+| 6 | role | ENUM('admin','super_admin') | Default 'admin' | Admin role type |
+| 7 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 8 | last_login | DATETIME | Null | Last login timestamp |
+| 9 | status | ENUM('active','inactive','suspended') | Default 'active' | Account status |
+
+## 2. Seller Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | seller_id | INT(11) | Primary Key | Unique Seller ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | business_name | VARCHAR(255) | Not Null | Business name |
+| 4 | business_type | VARCHAR(100) | Null | Type of business |
+| 5 | registration_number | VARCHAR(100) | Null | Business registration number |
+| 6 | address | TEXT | Null | Business address |
+| 7 | contact_person | VARCHAR(100) | Null | Contact person name |
+| 8 | contact_phone | VARCHAR(20) | Null | Contact phone number |
+| 9 | website_url | VARCHAR(255) | Null | Website URL |
+| 10 | business_license_url | VARCHAR(500) | Null | License document URL |
+| 11 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 12 | review_count | INT | Default 0 | Number of reviews |
+| 13 | status | ENUM('pending','approved','rejected','suspended') | Default 'pending' | Approval status |
+| 14 | approval_date | DATETIME | Null | Date of approval |
+| 15 | rejection_reason | TEXT | Null | Reason for rejection |
+| 16 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 17 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 3. Service Provider Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | provider_id | INT(11) | Primary Key | Unique Provider ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | company_name | VARCHAR(255) | Not Null | Company name |
+| 4 | specialization | VARCHAR(100) | Null | Specialization area |
+| 5 | certification_level | VARCHAR(50) | Null | Certification level |
+| 6 | experience_years | INT | Null | Years of experience |
+| 7 | address | TEXT | Null | Company address |
+| 8 | contact_person | VARCHAR(100) | Null | Contact person name |
+| 9 | contact_phone | VARCHAR(20) | Null | Contact phone number |
+| 10 | website_url | VARCHAR(255) | Null | Website URL |
+| 11 | license_certification_url | VARCHAR(500) | Null | License document URL |
+| 12 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 13 | review_count | INT | Default 0 | Number of reviews |
+| 14 | status | ENUM('pending','approved','rejected','suspended') | Default 'pending' | Approval status |
+| 15 | approval_date | DATETIME | Null | Date of approval |
+| 16 | rejection_reason | TEXT | Null | Reason for rejection |
+| 17 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 18 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 4. Delivery Supplier Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | supplier_id | INT(11) | Primary Key | Unique Supplier ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | company_name | VARCHAR(255) | Not Null | Company name |
+| 4 | fleet_size | INT | Null | Size of fleet |
+| 5 | service_area | TEXT | Null | Service coverage area |
+| 6 | delivery_capacity | INT | Null | Daily delivery capacity |
+| 7 | address | TEXT | Null | Company address |
+| 8 | contact_person | VARCHAR(100) | Null | Contact person name |
+| 9 | contact_phone | VARCHAR(20) | Null | Contact phone number |
+| 10 | website_url | VARCHAR(255) | Null | Website URL |
+| 11 | license_certification_url | VARCHAR(500) | Null | License document URL |
+| 12 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 13 | review_count | INT | Default 0 | Number of reviews |
+| 14 | status | ENUM('pending','approved','rejected','suspended') | Default 'pending' | Approval status |
+| 15 | approval_date | DATETIME | Null | Date of approval |
+| 16 | rejection_reason | TEXT | Null | Reason for rejection |
+| 17 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 18 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 5. Support Agent Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | agent_id | INT(11) | Primary Key | Unique Agent ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | department | VARCHAR(100) | Null | Department name |
+| 4 | designation | VARCHAR(100) | Null | Job title |
+| 5 | experience_years | INT | Null | Years of experience |
+| 6 | skills | TEXT | Null | Skills and expertise |
+| 7 | availability_hours | TEXT | Null | Working hours |
+| 8 | address | TEXT | Null | Address |
+| 9 | contact_phone | VARCHAR(20) | Null | Phone number |
+| 10 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 11 | review_count | INT | Default 0 | Number of reviews |
+| 12 | status | ENUM('active','inactive','on_leave') | Default 'active' | Current status |
+| 13 | supervisor_id | INT | Foreign Key, Set NULL | Supervisor's agent ID |
+| 14 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 15 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 6. Customer Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | customer_id | INT(11) | Primary Key | Unique Customer ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | full_name | VARCHAR(255) | Null | Full name |
+| 4 | preferred_contact_method | ENUM('email','phone','both') | Default 'both' | Preferred contact method |
+| 5 | car_preferences | TEXT | Null | Preferred car types |
+| 6 | modification_history | TEXT | Null | History of modifications |
+| 7 | loyalty_points | INT | Default 0 | Loyalty points earned |
+| 8 | referral_code | VARCHAR(50) | Null | Referral code |
+| 9 | referred_by | VARCHAR(50) | Null | Who referred them |
+| 10 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 11 | review_count | INT | Default 0 | Number of reviews |
+| 12 | status | ENUM('active','inactive','suspended') | Default 'active' | Account status |
+| 13 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 14 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |-- Adding tables for the additional entities
+
+-- 1️⃣ admin_users – Stores information about admin users (if not already covered in users table)
+CREATE TABLE IF NOT EXISTS admin_users (
+    admin_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    phone VARCHAR(20),
+    role ENUM('admin', 'super_admin') DEFAULT 'admin',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login DATETIME,
+    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active'
+);
+
+-- 2️⃣ seller_profiles – Stores information about sellers
+CREATE TABLE IF NOT EXISTS seller_profiles (
+    seller_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    business_name VARCHAR(255) NOT NULL,
+    business_type VARCHAR(100),
+    registration_number VARCHAR(100),
+    address TEXT,
+    contact_person VARCHAR(100),
+    contact_phone VARCHAR(20),
+    website_url VARCHAR(255),
+    business_license_url VARCHAR(500),
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    review_count INT DEFAULT 0,
+    status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending',
+    approval_date DATETIME,
+    rejection_reason TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- 3️⃣ service_provider_profiles – Stores information about service providers
+CREATE TABLE IF NOT EXISTS service_provider_profiles (
+    provider_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    specialization VARCHAR(100),
+    certification_level VARCHAR(50),
+    experience_years INT,
+    address TEXT,
+    contact_person VARCHAR(100),
+    contact_phone VARCHAR(20),
+    website_url VARCHAR(255),
+    license_certification_url VARCHAR(500),
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    review_count INT DEFAULT 0,
+    status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending',
+    approval_date DATETIME,
+    rejection_reason TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- 4️⃣ delivery_supplier_profiles – Stores information about delivery suppliers
+CREATE TABLE IF NOT EXISTS delivery_supplier_profiles (
+    supplier_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    fleet_size INT,
+    service_area TEXT,
+    delivery_capacity INT,
+    address TEXT,
+    contact_person VARCHAR(100),
+    contact_phone VARCHAR(20),
+    website_url VARCHAR(255),
+    license_certification_url VARCHAR(500),
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    review_count INT DEFAULT 0,
+    status ENUM('pending', 'approved', 'rejected', 'suspended') DEFAULT 'pending',
+    approval_date DATETIME,
+    rejection_reason TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- 5️⃣ support_agent_profiles – Stores information about support agents
+CREATE TABLE IF NOT EXISTS support_agent_profiles (
+    agent_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    department VARCHAR(100),
+    designation VARCHAR(100),
+    experience_years INT,
+    skills TEXT,
+    availability_hours TEXT,
+    address TEXT,
+    contact_phone VARCHAR(20),
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    review_count INT DEFAULT 0,
+    status ENUM('active', 'inactive', 'on_leave') DEFAULT 'active',
+    supervisor_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (supervisor_id) REFERENCES support_agent_profiles(agent_id) ON DELETE SET NULL
+);
+
+-- 6️⃣ customer_profiles – Stores additional information about customers
+CREATE TABLE IF NOT EXISTS customer_profiles (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    full_name VARCHAR(255),
+    preferred_contact_method ENUM('email', 'phone', 'both') DEFAULT 'both',
+    car_preferences TEXT,
+    modification_history TEXT,
+    loyalty_points INT DEFAULT 0,
+    referral_code VARCHAR(50),
+    referred_by VARCHAR(50),
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    review_count INT DEFAULT 0,
+    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);# Car Modification System - Entity Tables
+
+## 1. Admin Users Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | admin_id | INT(11) | Primary Key | Unique Admin ID |
+| 2 | name | VARCHAR(255) | Not Null | Admin name |
+| 3 | email | VARCHAR(255) | Unique, Not Null | Admin email address |
+| 4 | password_hash | VARCHAR(255) | Not Null | Hashed password |
+| 5 | phone | VARCHAR(20) | Null | Admin phone number |
+| 6 | role | ENUM('admin','super_admin') | Default 'admin' | Admin role type |
+| 7 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 8 | last_login | DATETIME | Null | Last login timestamp |
+| 9 | status | ENUM('active','inactive','suspended') | Default 'active' | Account status |
+
+## 2. Seller Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | seller_id | INT(11) | Primary Key | Unique Seller ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | business_name | VARCHAR(255) | Not Null | Business name |
+| 4 | business_type | VARCHAR(100) | Null | Type of business |
+| 5 | registration_number | VARCHAR(100) | Null | Business registration number |
+| 6 | address | TEXT | Null | Business address |
+| 7 | contact_person | VARCHAR(100) | Null | Contact person name |
+| 8 | contact_phone | VARCHAR(20) | Null | Contact phone number |
+| 9 | website_url | VARCHAR(255) | Null | Website URL |
+| 10 | business_license_url | VARCHAR(500) | Null | License document URL |
+| 11 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 12 | review_count | INT | Default 0 | Number of reviews |
+| 13 | status | ENUM('pending','approved','rejected','suspended') | Default 'pending' | Approval status |
+| 14 | approval_date | DATETIME | Null | Date of approval |
+| 15 | rejection_reason | TEXT | Null | Reason for rejection |
+| 16 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 17 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 3. Service Provider Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | provider_id | INT(11) | Primary Key | Unique Provider ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | company_name | VARCHAR(255) | Not Null | Company name |
+| 4 | specialization | VARCHAR(100) | Null | Specialization area |
+| 5 | certification_level | VARCHAR(50) | Null | Certification level |
+| 6 | experience_years | INT | Null | Years of experience |
+| 7 | address | TEXT | Null | Company address |
+| 8 | contact_person | VARCHAR(100) | Null | Contact person name |
+| 9 | contact_phone | VARCHAR(20) | Null | Contact phone number |
+| 10 | website_url | VARCHAR(255) | Null | Website URL |
+| 11 | license_certification_url | VARCHAR(500) | Null | License document URL |
+| 12 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 13 | review_count | INT | Default 0 | Number of reviews |
+| 14 | status | ENUM('pending','approved','rejected','suspended') | Default 'pending' | Approval status |
+| 15 | approval_date | DATETIME | Null | Date of approval |
+| 16 | rejection_reason | TEXT | Null | Reason for rejection |
+| 17 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 18 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 4. Delivery Supplier Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | supplier_id | INT(11) | Primary Key | Unique Supplier ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | company_name | VARCHAR(255) | Not Null | Company name |
+| 4 | fleet_size | INT | Null | Size of fleet |
+| 5 | service_area | TEXT | Null | Service coverage area |
+| 6 | delivery_capacity | INT | Null | Daily delivery capacity |
+| 7 | address | TEXT | Null | Company address |
+| 8 | contact_person | VARCHAR(100) | Null | Contact person name |
+| 9 | contact_phone | VARCHAR(20) | Null | Contact phone number |
+| 10 | website_url | VARCHAR(255) | Null | Website URL |
+| 11 | license_certification_url | VARCHAR(500) | Null | License document URL |
+| 12 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 13 | review_count | INT | Default 0 | Number of reviews |
+| 14 | status | ENUM('pending','approved','rejected','suspended') | Default 'pending' | Approval status |
+| 15 | approval_date | DATETIME | Null | Date of approval |
+| 16 | rejection_reason | TEXT | Null | Reason for rejection |
+| 17 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 18 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 5. Support Agent Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | agent_id | INT(11) | Primary Key | Unique Agent ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | department | VARCHAR(100) | Null | Department name |
+| 4 | designation | VARCHAR(100) | Null | Job title |
+| 5 | experience_years | INT | Null | Years of experience |
+| 6 | skills | TEXT | Null | Skills and expertise |
+| 7 | availability_hours | TEXT | Null | Working hours |
+| 8 | address | TEXT | Null | Address |
+| 9 | contact_phone | VARCHAR(20) | Null | Phone number |
+| 10 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 11 | review_count | INT | Default 0 | Number of reviews |
+| 12 | status | ENUM('active','inactive','on_leave') | Default 'active' | Current status |
+| 13 | supervisor_id | INT | Foreign Key, Set NULL | Supervisor's agent ID |
+| 14 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 15 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+
+## 6. Customer Profiles Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | customer_id | INT(11) | Primary Key | Unique Customer ID |
+| 2 | user_id | INT(11) | Foreign Key | Reference to users table |
+| 3 | full_name | VARCHAR(255) | Null | Full name |
+| 4 | preferred_contact_method | ENUM('email','phone','both') | Default 'both' | Preferred contact method |
+| 5 | car_preferences | TEXT | Null | Preferred car types |
+| 6 | modification_history | TEXT | Null | History of modifications |
+| 7 | loyalty_points | INT | Default 0 | Loyalty points earned |
+| 8 | referral_code | VARCHAR(50) | Null | Referral code |
+| 9 | referred_by | VARCHAR(50) | Null | Who referred them |
+| 10 | rating | DECIMAL(3,2) | Default 0.00 | Average rating |
+| 11 | review_count | INT | Default 0 | Number of reviews |
+| 12 | status | ENUM('active','inactive','suspended') | Default 'active' | Account status |
+| 13 | created_at | DATETIME | Default CURRENT_TIMESTAMP | Record creation date |
+| 14 | updated_at | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |-- =============================================
 -- CarMod Database Schema - User Specified Structure
 -- Car Modification Platform Database
 -- =============================================
@@ -240,5 +603,71 @@ INSERT INTO payments (user_id, booking_id, quotation_id, amount, method, transac
 INSERT INTO admin_logs (action_type, entity_id, performed_by, notes) VALUES
 ('approve', 1, 1, 'Approved quotation for BMW M3 modifications'),
 ('create', 4, 1, 'Added new part to catalog');
+
+## 12. Orders Table
+
+| SR.NO | FIELDNAME | DATATYPE(SIZE) | CONSTRAINT | DESCRIPTION |
+|-------|-----------|----------------|------------|-------------|
+| 1 | order_id         | INT(11) | Primary Key | Unique Order ID |
+| 2 | user_id          | INT(11) | Foreign Key | Reference to users table |
+| 3 | part_id          | INT(11) | Foreign Key, Null | Reference to parts table |
+| 4 | service_id       | INT(11) | Foreign Key, Null | Reference to services table |
+| 5 | customization_id | INT(11) | Foreign Key, Null | Reference to customizations table |
+| 6 | quantity         | INT(11) | Not Null, Default 1 | Quantity of items ordered |
+| 7 | unit_price       | DECIMAL(10,2) | Not Null | Price per unit |
+| 8 | total_amount     | DECIMAL(10,2) | Not Null | Total order amount |
+| 9 | status           | ENUM('pending','confirmed','processing','shipped','delivered','cancelled') | Default 'pending' | Order status |
+| 10 | shipping_address| TEXT | Null | Delivery address |
+| 11 | shipping_method | VARCHAR(100) | Null | Shipping method |
+| 12 | tracking_number | VARCHAR(255) | Null | Shipping tracking number |
+| 13 | ordered_at      | DATETIME | Default CURRENT_TIMESTAMP | Order creation date |
+| 14 | updated_at      | DATETIME | Default CURRENT_TIMESTAMP, ON UPDATE CURRENT_TIMESTAMP | Last update timestamp |
+| 15 | delivered_at    | DATETIME | Null | Delivery completion date |
+
+-- =============================================
+-- 12. ORDERS - Customer orders for parts and services
+-- =============================================
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    -- Reference to either a part, service, or customization
+    part_id INT NULL,
+    service_id INT NULL,
+    customization_id INT NULL,
+    -- Order details
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    -- Order status tracking
+    status ENUM('pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    -- Shipping information
+    shipping_address TEXT,
+    shipping_method VARCHAR(100),
+    tracking_number VARCHAR(255),
+    -- Timestamps
+    ordered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    delivered_at DATETIME NULL,
+    -- Foreign key constraints
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (part_id) REFERENCES parts(part_id) ON DELETE SET NULL,
+    FOREIGN KEY (service_id) REFERENCES services(service_id) ON DELETE SET NULL,
+    FOREIGN KEY (customization_id) REFERENCES customizations(customization_id) ON DELETE SET NULL
+);
+
+-- Indexes for better performance
+CREATE INDEX idx_orders_user ON orders(user_id);
+CREATE INDEX idx_orders_part ON orders(part_id);
+CREATE INDEX idx_orders_service ON orders(service_id);
+CREATE INDEX idx_orders_customization ON orders(customization_id);
+CREATE INDEX idx_orders_status ON orders(status);
+
+-- =============================================
+-- SAMPLE ORDER DATA
+-- =============================================
+INSERT INTO orders (user_id, part_id, quantity, unit_price, total_amount, status, shipping_address, shipping_method) VALUES
+(2, 1, 1, 1299.00, 1299.00, 'delivered', '123 Main St, City, State 12345', 'Standard Shipping', 'TRK123456789'),
+(3, 2, 1, 2499.00, 2499.00, 'shipped', '456 Oak Ave, Town, State 67890', 'Express Shipping', 'TRK987654321'),
+(2, 3, 2, 2800.00, 5600.00, 'processing', '123 Main St, City, State 12345', 'Standard Shipping', NULL);
 
 SELECT 'CarMod Database Setup Complete - User Specified Structure!' as Status;

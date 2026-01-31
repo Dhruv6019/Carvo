@@ -1,188 +1,437 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Navigation } from "@/components/Navigation";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { 
-  Users, 
-  Car, 
-  ShoppingCart, 
-  DollarSign, 
+import { Switch } from "@/components/ui/switch";
+import {
+  Users,
+  Car,
+  ShoppingCart,
+  DollarSign,
   TrendingUp,
   Plus,
   Edit,
   Trash2,
   Search,
   Filter,
-  Download
+  Download,
+  Ticket,
+  ChevronLeft,
+  ChevronRight,
+  Puzzle,
+  ChevronDown,
+  Settings
 } from "lucide-react";
+import api from "@/lib/api";
+import { exportToCSV } from "@/lib/utils";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { RevenueChart } from "@/components/Admin/RevenueChart";
+import { ModulesView } from "@/components/Admin/ModulesView";
+import { AddModuleUserModal } from "@/components/Admin/AddModuleUserModal";
 
 export const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
+  const [revenuePeriod, setRevenuePeriod] = useState("month");
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [users, setUsers] = useState<any[]>([]);
+
+  // ... (other states)
+
+  // Fetch Revenue specific effect
+  useEffect(() => {
+    const fetchRevenue = async () => {
+      try {
+        const res = await api.get(`/admin/analytics/revenue?period=${revenuePeriod.toLowerCase()}`);
+        setRevenueTrend(res.data);
+      } catch (error) {
+        console.error("Failed to fetch revenue trend");
+      }
+    };
+    fetchRevenue();
+  }, [revenuePeriod]);
+
+
+  const [cars, setCars] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewingOrder, setViewingOrder] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingCar, setEditingCar] = useState<any>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isCarModalOpen, setIsCarModalOpen] = useState(false);
+  const [revenueTrend, setRevenueTrend] = useState<any[]>([]);
+  const [usersPage, setUsersPage] = useState(1);
+  const [carsPage, setCarsPage] = useState(1);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [couponsPage, setCouponsPage] = useState(1);
+  const itemsPerPage = 10;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<any>(null);
+  const [isModuleUserModalOpen, setIsModuleUserModalOpen] = useState(false);
+
+
+  const handleAddModuleUser = () => {
+    setEditingUser(null);
+    setIsModuleUserModalOpen(true);
+  };
+
+  const handleEditModuleUser = (user: any) => {
+    setEditingUser(user);
+    setIsModuleUserModalOpen(true);
+  };
+
+  const [userFormData, setUserFormData] = useState({
+    name: "",
+    email: "",
+    role: "customer",
+    phone: ""
+  });
+
+  const [carFormData, setCarFormData] = useState({
+    make: "",
+    model: "",
+    year: new Date().getFullYear(),
+    base_price: 0
+  });
+
+  // Settings State
+  const [settings, setSettings] = useState({
+    disableEmails: false,
+    disablePush: false
+  });
+
+  const fetchSettings = async () => {
+    try {
+      const res = await api.get("/admin/settings");
+      if (res.data) {
+        const fetchedSettings = res.data;
+        const newSettings = { disableEmails: false, disablePush: false };
+        fetchedSettings.forEach((s: any) => {
+          if (s.key === "DISABLE_EMAILS") newSettings.disableEmails = s.value === "true";
+          if (s.key === "DISABLE_PUSH") newSettings.disablePush = s.value === "true";
+        });
+        setSettings(newSettings);
+      }
+    } catch (error) {
+      console.error("Failed to fetch settings", error);
+    }
+  };
+
+  const handleSettingChange = async (key: string, value: string) => {
+    try {
+      await api.put(`/admin/settings/${key}`, { value });
+      setSettings(prev => ({
+        ...prev,
+        [key === "DISABLE_EMAILS" ? "disableEmails" : "disablePush"]: value === "true"
+      }));
+      toast.success("Settings updated");
+    } catch (error) {
+      toast.error("Failed to update settings");
+    }
+  };
+
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [editingCoupon, setEditingCoupon] = useState<any>(null);
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [couponFormData, setCouponFormData] = useState({
+    code: "",
+    discount_type: "percentage",
+    discount_value: 0,
+    min_order_value: 0,
+    max_discount: 0,
+    usage_limit: 0,
+    expiry_date: ""
+  });
+
+  const handleSaveUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      if (editingUser) {
+        await api.put(`/admin/users/${editingUser.id}`, userFormData);
+        toast.success("User updated successfully");
+      } else {
+        await api.post("/admin/users", userFormData);
+        toast.success("User created successfully");
+      }
+      setIsUserModalOpen(false);
+      setEditingUser(null);
+      // Refresh users
+      const usersRes = await api.get("/admin/users");
+      setUsers(usersRes.data);
+    } catch (error) {
+      toast.error("Failed to save user");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveCar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      if (editingCar) {
+        await api.put(`/admin/cars/${editingCar.id}`, carFormData);
+        toast.success("Car updated successfully");
+      } else {
+        await api.post("/admin/cars", carFormData);
+        toast.success("Car created successfully");
+      }
+      setIsCarModalOpen(false);
+      setEditingCar(null);
+      // Refresh cars
+      const carsRes = await api.get("/customer/cars");
+      setCars(carsRes.data);
+    } catch (error) {
+      toast.error("Failed to save car");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    setIsDeleting({ type: 'user', id });
+    try {
+      await api.delete(`/admin/users/${id}`);
+      setUsers(users.filter(u => u.id !== id));
+      toast.success("User deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete user");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleDeleteCar = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this car?")) return;
+    setIsDeleting({ type: 'car', id });
+    try {
+      await api.delete(`/admin/cars/${id}`);
+      setCars(cars.filter(c => c.id !== id));
+      toast.success("Car deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete car");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleSaveCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload = { ...couponFormData };
+      // Ensure numbers are numbers
+      payload.discount_value = Number(payload.discount_value);
+      payload.min_order_value = Number(payload.min_order_value);
+      payload.max_discount = Number(payload.max_discount);
+      payload.usage_limit = Number(payload.usage_limit);
+
+      if (editingCoupon) {
+        await api.put(`/coupons/${editingCoupon.id}`, payload);
+        toast.success("Coupon updated successfully");
+      } else {
+        await api.post("/coupons", payload);
+        toast.success("Coupon created successfully");
+      }
+      setIsCouponModalOpen(false);
+      setEditingCoupon(null);
+      // Refresh coupons
+      const couponsRes = await api.get("/coupons");
+      setCoupons(couponsRes.data);
+    } catch (error) {
+      toast.error("Failed to save coupon");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteCoupon = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this coupon?")) return;
+    setIsDeleting({ type: 'coupon', id });
+    try {
+      await api.delete(`/coupons/${id}`);
+      setCoupons(coupons.filter(c => c.id !== id));
+      toast.success("Coupon deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete coupon");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Analytics
+        const analyticsRes = await api.get("/admin/analytics");
+        setAnalytics(analyticsRes.data);
+
+        // Fetch Users
+        const usersRes = await api.get("/admin/users");
+        setUsers(usersRes.data);
+
+        // Fetch Cars (using public endpoint for now, or admin specific if created)
+        const carsRes = await api.get("/customer/cars");
+        setCars(carsRes.data);
+
+        // Fetch Orders
+        const ordersRes = await api.get("/admin/orders");
+        setOrders(ordersRes.data);
+
+        // Fetch Coupons
+        const couponsRes = await api.get("/coupons");
+        setCoupons(couponsRes.data);
+
+        // Fetch Settings
+        await fetchSettings();
+
+      } catch (error) {
+        console.error("Error fetching admin data", error);
+        toast.error("Failed to load admin data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const stats = [
-    { label: "Total Users", value: "2,456", icon: Users, color: "text-blue-500" },
-    { label: "Active Orders", value: "142", icon: ShoppingCart, color: "text-green-500" },
-    { label: "Car Models", value: "89", icon: Car, color: "text-purple-500" },
-    { label: "Revenue", value: "$145,320", icon: DollarSign, color: "text-yellow-500" }
-  ];
-
-  const recentOrders = [
-    {
-      id: "ORD-001",
-      customer: "John Doe",
-      vehicle: "BMW M3",
-      status: "In Progress",
-      total: "$7,950",
-      date: "2024-01-20"
-    },
-    {
-      id: "ORD-002",
-      customer: "Jane Smith", 
-      vehicle: "Audi RS6",
-      status: "Completed",
-      total: "$12,340",
-      date: "2024-01-19"
-    },
-    {
-      id: "ORD-003",
-      customer: "Mike Johnson",
-      vehicle: "Porsche 911",
-      status: "Pending",
-      total: "$15,680",
-      date: "2024-01-18"
-    }
-  ];
-
-  const carModels = [
-    {
-      id: 1,
-      brand: "BMW",
-      model: "M3",
-      year: "2023",
-      variants: 3,
-      modifications: 24,
-      status: "Active"
-    },
-    {
-      id: 2,
-      brand: "Mercedes",
-      model: "AMG GT",
-      year: "2023",
-      variants: 2,
-      modifications: 18,
-      status: "Active"
-    },
-    {
-      id: 3,
-      brand: "Audi",
-      model: "RS6",
-      year: "2023",
-      variants: 4,
-      modifications: 31,
-      status: "Active"
-    }
-  ];
-
-  const modifications = [
-    {
-      id: 1,
-      name: "Matte Black Paint",
-      category: "Paint",
-      price: "$1,200",
-      compatibility: "Universal",
-      status: "Active"
-    },
-    {
-      id: 2,
-      name: "Carbon Fiber Wheels",
-      category: "Wheels",
-      price: "$3,500",
-      compatibility: "BMW, Audi",
-      status: "Active"
-    },
-    {
-      id: 3,
-      name: "Sport Interior Package",
-      category: "Interior",
-      price: "$2,800",
-      compatibility: "Premium Cars",
-      status: "Active"
-    }
+    { label: "Total Users", value: users.length.toString(), icon: Users, color: "text-blue-500" },
+    { label: "Revenue", value: `₹${analytics?.dailyRevenue || 0}`, icon: DollarSign, color: "text-yellow-500" },
+    { label: "Active Modules", value: users.filter(u => ['seller', 'delivery_boy', 'service_provider', 'support_agent'].includes(u.role)).length.toString(), icon: Puzzle, color: "text-emerald-500" },
+    { label: "Active Bookings", value: analytics?.activeBookings?.toString() || "0", icon: ShoppingCart, color: "text-green-500" },
+    { label: "Pending Quotes", value: analytics?.pendingQuotations?.toString() || "0", icon: Car, color: "text-purple-500" }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-background">
+    <div className="flex min-h-screen bg-gray-50/50 dark:bg-gray-900">
       <Navigation />
-      
-      <div className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-display font-black text-foreground mb-4">
-              Admin <span className="bg-gradient-to-r from-electric-blue to-burnt-orange bg-clip-text text-transparent">Panel</span>
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Manage your car modification platform
-            </p>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex pt-0">
+        {/* Sidebar */}
+        <aside className="fixed left-0 top-0 bottom-0 w-64 bg-background border-r z-50 hidden md:block overflow-y-auto pt-6 px-4 shadow-lg">
+          <div className="mb-8 px-2">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-electric-blue to-burnt-orange bg-clip-text text-transparent">
+              Admin Panel
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">Management Console</p>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="orders">Orders</TabsTrigger>
-              <TabsTrigger value="cars">Car Models</TabsTrigger>
-              <TabsTrigger value="modifications">Modifications</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-            </TabsList>
+          <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 space-y-2">
+            <TabsTrigger value="dashboard" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <TrendingUp className="w-5 h-5 mr-3" /> Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="users" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Users className="w-5 h-5 mr-3" /> Users
+            </TabsTrigger>
+            <TabsTrigger value="modules" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Users className="w-5 h-5 mr-3" /> Modules
+            </TabsTrigger>
+            <TabsTrigger value="cars" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Car className="w-5 h-5 mr-3" /> Car Models
+            </TabsTrigger>
+            <TabsTrigger value="coupons" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Ticket className="w-5 h-5 mr-3" /> Coupons
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <ShoppingCart className="w-5 h-5 mr-3" /> Orders
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Settings className="w-5 h-5 mr-3" /> Settings
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Settings className="w-5 h-5 mr-3" /> Settings
+            </TabsTrigger>
+          </TabsList>
+        </aside>
 
-            {/* Dashboard Overview */}
-            <TabsContent value="dashboard" className="space-y-6">
+        {/* Main Content */}
+        <div className="flex-1 md:ml-64 px-8 pb-8 pt-28 overflow-x-hidden min-h-[calc(100vh-4rem)]">
+          <div className="max-w-6xl mx-auto space-y-8">
+            {/* Mobile Header (visible only on small screens) */}
+            <div className="md:hidden mb-6">
+              <h1 className="text-3xl font-bold text-foreground">Admin Panel</h1>
+            </div>
+
+            <TabsContent value="dashboard" className="mt-0 space-y-6">
+              <div className="mb-2">
+                <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
+                <p className="text-muted-foreground">Overview of your platform's performance</p>
+              </div>
+
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 {stats.map((stat, index) => (
-                  <Card key={index} className="p-6">
+                  <Card key={index} className="p-6 transition-all hover:shadow-md">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground">{stat.label}</p>
-                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                        <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+                        <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
                       </div>
-                      <stat.icon className={`w-8 h-8 ${stat.color}`} />
+                      <div className={`p-3 rounded-full bg-gray-100 dark:bg-gray-800 ${stat.color.replace('text-', 'text-')}`}>
+                        <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                      </div>
                     </div>
                   </Card>
                 ))}
               </div>
 
-              {/* Charts & Recent Activity */}
               <div className="grid lg:grid-cols-2 gap-6">
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                    <TrendingUp className="w-5 h-5 mr-2 text-electric-blue" />
-                    Revenue Trend
-                  </h3>
-                  <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
-                    <p className="text-muted-foreground">Chart Component Here</p>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-foreground flex items-center">
+                      <TrendingUp className="w-5 h-5 mr-2 text-electric-blue" />
+                      Revenue Trend
+                    </h3>
+                    <div className="relative">
+                      <select
+                        value={revenuePeriod}
+                        onChange={(e) => setRevenuePeriod(e.target.value)}
+                        className="appearance-none bg-background border px-3 py-1.5 pr-8 rounded-md text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                      >
+                        <option value="month">Month</option>
+                        <option value="week">Week</option>
+                        <option value="year">Year</option>
+                      </select>
+                      <ChevronRight className="w-4 h-4 absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="h-80 w-full">
+                    <RevenueChart data={revenueTrend} />
                   </div>
                 </Card>
 
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Recent Orders</h3>
-                  <div className="space-y-3">
-                    {recentOrders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                        <div>
-                          <p className="font-medium text-foreground">{order.id}</p>
-                          <p className="text-sm text-muted-foreground">{order.customer} - {order.vehicle}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-6">Recent Users</h3>
+                  <div className="space-y-4">
+                    {users.slice(0, 5).map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-4">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground">{user.name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <Badge variant={order.status === "Completed" ? "default" : "secondary"}>
-                            {order.status}
-                          </Badge>
-                          <p className="text-sm font-medium text-foreground mt-1">{order.total}</p>
-                        </div>
+                        <Badge variant="secondary" className="capitalize">
+                          {user.role.replace('_', ' ')}
+                        </Badge>
                       </div>
                     ))}
                   </div>
@@ -190,103 +439,277 @@ export const AdminPanel = () => {
               </div>
             </TabsContent>
 
-            {/* Orders Management */}
-            <TabsContent value="orders" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <TabsContent value="users" className="mt-0 space-y-6">
+              {/* ... existing Users content content with minimal changes, just ensuring spacing ... */}
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-3xl font-bold text-foreground">Users</h2>
+                  <p className="text-muted-foreground">Manage all registered users</p>
+                </div>
+                <div className="flex space-x-2 w-full md:w-auto">
+                  {/* ... search & actions ... */}
+                  <div className="relative flex-1 md:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search orders..."
+                      placeholder="Search users..."
+                      className="pl-10"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 w-64"
                     />
                   </div>
-                  <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
+                  <Button variant="outline" onClick={() => exportToCSV(users, "users")}>
+                    <Download className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">Export</span>
+                  </Button>
+                  <Button className="bg-electric-blue" onClick={() => {
+                    setEditingUser(null);
+                    setUserFormData({ name: "", email: "", role: "customer", phone: "" });
+                    setIsUserModalOpen(true);
+                  }}>
+                    <Plus className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">Add User</span>
                   </Button>
                 </div>
-                <Button variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export CSV
-                </Button>
               </div>
 
-              <Card className="p-6">
-                <div className="space-y-4">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="grid grid-cols-4 gap-4 flex-1">
-                        <div>
-                          <p className="font-medium text-foreground">{order.id}</p>
-                          <p className="text-sm text-muted-foreground">{order.date}</p>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                {/* Users List rendered slightly better */}
+                <div className="divide-y">
+                  {users
+                    .filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.email.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .slice((usersPage - 1) * itemsPerPage, usersPage * itemsPerPage)
+                    .map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="grid gap-1">
+                            <p className="font-medium text-foreground leading-none">{user.name}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-foreground">{order.customer}</p>
-                          <p className="text-sm text-muted-foreground">{order.vehicle}</p>
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline" className="capitalize">{user.role.replace('_', ' ')}</Badge>
+                          <div className="text-sm text-muted-foreground hidden lg:block">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              setEditingUser(user);
+                              setUserFormData({ name: user.name, email: user.email, role: user.role, phone: user.phone || "" });
+                              setIsUserModalOpen(true);
+                            }}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                              onClick={() => handleDeleteUser(user.id)}
+                              disabled={isDeleting?.type === 'user' && isDeleting?.id === user.id}
+                            >
+                              <Trash2 className={`w-4 h-4 ${isDeleting?.type === 'user' && isDeleting?.id === user.id ? 'animate-spin' : ''}`} />
+                            </Button>
+                          </div>
                         </div>
-                        <div>
-                          <Badge variant={order.status === "Completed" ? "default" : "secondary"}>
-                            {order.status}
+                      </div>
+                    ))}
+                </div>
+                {users.length > itemsPerPage && (
+                  <div className="flex items-center justify-center space-x-2 p-4 border-t">
+                    <Button variant="outline" size="sm" onClick={() => setUsersPage(p => Math.max(1, p - 1))} disabled={usersPage === 1}>
+                      <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                    </Button>
+                    <span className="text-sm">Page {usersPage}</span>
+                    <Button variant="outline" size="sm" onClick={() => setUsersPage(p => p + 1)} disabled={usersPage * itemsPerPage >= users.length}>
+                      Next <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="modules" className="mt-0 space-y-6">
+              <ModulesView
+                users={users}
+                onAddUser={handleAddModuleUser}
+                onEditUser={handleEditModuleUser}
+              />
+            </TabsContent>
+
+            <TabsContent value="cars" className="mt-0 space-y-6">
+              {/* ... Cars Layout similar improvements ... */}
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-3xl font-bold text-foreground">Car Models</h2>
+                  <p className="text-muted-foreground">Manage vehicle catalog</p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="outline" onClick={() => exportToCSV(cars, "car-models")}>
+                    <Download className="w-4 h-4 mr-2" /> Export
+                  </Button>
+                  <Button className="bg-electric-blue" onClick={() => {
+                    setEditingCar(null);
+                    setCarFormData({ make: "", model: "", year: new Date().getFullYear(), base_price: 0 });
+                    setIsCarModalOpen(true);
+                  }}>
+                    <Plus className="w-4 h-4 mr-2" /> Add Model
+                  </Button>
+                </div>
+              </div>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                <div className="divide-y">
+                  {cars.slice((carsPage - 1) * itemsPerPage, carsPage * itemsPerPage).map((car) => (
+                    <div key={car.id} className="flex items-center justify-between p-4 hover:bg-gray-50/50">
+                      <div className="grid gap-1">
+                        <p className="font-medium text-foreground">{car.make} {car.model}</p>
+                        <div className="flex gap-2 text-sm text-muted-foreground">
+                          <span>{car.year}</span>
+                          <span>•</span>
+                          <span className="font-medium text-foreground">₹{car.base_price.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setEditingCar(car);
+                          setCarFormData({ make: car.make, model: car.model, year: car.year, base_price: car.base_price });
+                          setIsCarModalOpen(true);
+                        }}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50" onClick={() => handleDeleteCar(car.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Pagination ... */}
+                {cars.length > itemsPerPage && (
+                  <div className="flex items-center justify-center space-x-2 p-4 border-t">
+                    <Button variant="outline" size="sm" onClick={() => setCarsPage(p => Math.max(1, p - 1))} disabled={carsPage === 1}>
+                      <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                    </Button>
+                    <span className="text-sm">Page {carsPage}</span>
+                    <Button variant="outline" size="sm" onClick={() => setCarsPage(p => p + 1)} disabled={carsPage * itemsPerPage >= cars.length}>
+                      Next <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="orders" className="mt-0 space-y-6">
+              {/* ... Orders Layout ... */}
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-3xl font-bold text-foreground">Orders</h2>
+                  <p className="text-muted-foreground">Track and manage orders</p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="outline" onClick={() => {
+                    const sorted = [...orders].sort((a, b) => b.total_amount - a.total_amount);
+                    setOrders(sorted);
+                    toast.info("Sorted by amount high to low");
+                  }}>
+                    <Filter className="w-4 h-4 mr-2" /> Sort
+                  </Button>
+                  <Button variant="outline" onClick={() => exportToCSV(orders, "orders")}>
+                    <Download className="w-4 h-4 mr-2" /> Export
+                  </Button>
+                </div>
+              </div>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                <div className="divide-y">
+                  {orders.slice((ordersPage - 1) * itemsPerPage, ordersPage * itemsPerPage).map((order) => (
+                    <div key={order.id} className="p-4 hover:bg-gray-50/50 transition-colors">
+                      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-lg">#{order.id}</span>
+                            <Badge variant={order.status === 'delivered' ? 'default' : order.status === 'cancelled' ? 'destructive' : 'secondary'} className="capitalize">
+                              {order.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(order.created_at).toLocaleDateString()} • {order.items?.length || 0} items
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <p className="font-bold text-lg">₹{order.total_amount.toLocaleString()}</p>
+                            <p className="text-sm text-muted-foreground">{order.customer?.name || 'Unknown'}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setViewingOrder(order)}>Details</Button>
+                            <Button variant="outline" size="sm" onClick={async () => {
+                              try {
+                                const res = await api.post(`/invoices/${order.id}/generate`);
+                                window.open(`/invoice/${res.data.id}`, '_blank');
+                              } catch (err) {
+                                toast.error("Failed to generate invoice");
+                              }
+                            }}>
+                              <Ticket className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="coupons" className="mt-0 space-y-6">
+              {/* ... Coupons Layout ... */}
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-3xl font-bold text-foreground">Coupons</h2>
+                  <p className="text-muted-foreground">Manage discounts and offers</p>
+                </div>
+                <Button className="bg-electric-blue" onClick={() => {
+                  setEditingCoupon(null);
+                  setCouponFormData({
+                    code: "",
+                    discount_type: "percentage",
+                    discount_value: 0,
+                    min_order_value: 0,
+                    max_discount: 0,
+                    usage_limit: 0,
+                    expiry_date: ""
+                  });
+                  setIsCouponModalOpen(true);
+                }}>
+                  <Plus className="w-4 h-4 mr-2" /> Add Coupon
+                </Button>
+              </div>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                <div className="divide-y">
+                  {coupons.slice((couponsPage - 1) * itemsPerPage, couponsPage * itemsPerPage).map((coupon) => (
+                    <div key={coupon.id} className="flex items-center justify-between p-4 hover:bg-gray-50/50">
+                      <div className="grid gap-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono font-bold text-lg text-primary">{coupon.code}</span>
+                          <Badge variant={coupon.is_active ? "default" : "secondary"}>
+                            {coupon.is_active ? "Active" : "Inactive"}
                           </Badge>
                         </div>
-                        <div>
-                          <p className="font-medium text-foreground">{order.total}</p>
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {coupon.discount_type === 'percentage' ? `${coupon.discount_value}% off` : `₹${coupon.discount_value} off`}
+                          • Used {coupon.used_count} / {coupon.usage_limit || '∞'}
+                        </p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setEditingCoupon(coupon);
+                          setCouponFormData({ ...coupon, expiry_date: coupon.expiry_date ? new Date(coupon.expiry_date).toISOString().split('T')[0] : "" }); // Simplified
+                          setIsCouponModalOpen(true);
+                        }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </TabsContent>
-
-            {/* Car Models Management */}
-            <TabsContent value="cars" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-foreground">Car Models</h2>
-                <Button className="bg-electric-blue">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add New Model
-                </Button>
-              </div>
-
-              <Card className="p-6">
-                <div className="space-y-4">
-                  {carModels.map((car) => (
-                    <div key={car.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="grid grid-cols-5 gap-4 flex-1">
-                        <div>
-                          <p className="font-medium text-foreground">{car.brand}</p>
-                          <p className="text-sm text-muted-foreground">{car.model}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{car.year}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{car.variants} variants</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{car.modifications} mods</p>
-                        </div>
-                        <div>
-                          <Badge variant="default">{car.status}</Badge>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-red-500">
+                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteCoupon(coupon.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -296,75 +719,151 @@ export const AdminPanel = () => {
               </Card>
             </TabsContent>
 
-            {/* Modifications Management */}
-            <TabsContent value="modifications" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-foreground">Modifications</h2>
-                <Button className="bg-electric-blue">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add New Modification
-                </Button>
+            <TabsContent value="settings" className="mt-0 space-y-6">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-foreground">Settings</h2>
+                <p className="text-muted-foreground">Manage system-wide configurations</p>
               </div>
 
-              <Card className="p-6">
-                <div className="space-y-4">
-                  {modifications.map((mod) => (
-                    <div key={mod.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="grid grid-cols-5 gap-4 flex-1">
-                        <div>
-                          <p className="font-medium text-foreground">{mod.name}</p>
-                          <p className="text-sm text-muted-foreground">{mod.category}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{mod.price}</p>
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{mod.compatibility}</p>
-                        </div>
-                        <div>
-                          <Badge variant="default">{mod.status}</Badge>
-                        </div>
+              <div className="grid gap-6">
+                <Card className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Notification Preferences</h3>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-base font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Email Notifications
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          Enable or disable all outgoing system emails (OTP, Welcome, Orders).
+                        </p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-red-500">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      <Switch
+                        checked={!settings.disableEmails}
+                        onCheckedChange={(checked) => handleSettingChange("DISABLE_EMAILS", (!checked).toString())}
+                      />
                     </div>
-                  ))}
-                </div>
-              </Card>
-            </TabsContent>
-
-            {/* Users Management */}
-            <TabsContent value="users" className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-foreground">Users</h2>
-                <div className="flex space-x-2">
-                  <Button variant="outline">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
-                  <Button className="bg-electric-blue">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add User
-                  </Button>
-                </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <label className="text-base font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Push Notifications
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          Enable or disable system-wide push notifications.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={!settings.disablePush}
+                        onCheckedChange={(checked) => handleSettingChange("DISABLE_PUSH", (!checked).toString())}
+                      />
+                    </div>
+                  </div>
+                </Card>
               </div>
-
-              <Card className="p-6">
-                <div className="text-center py-12 text-muted-foreground">
-                  <Users className="w-16 h-16 mx-auto mb-4" />
-                  <p>User management interface would go here</p>
-                </div>
-              </Card>
             </TabsContent>
-          </Tabs>
+
+
+          </div>
         </div>
-      </div>
+      </Tabs>
+
+      {/* ... Modals (keep generic) ... */}
+
+      <AddModuleUserModal
+        isOpen={isModuleUserModalOpen}
+        onClose={() => setIsModuleUserModalOpen(false)}
+        onSuccess={async () => {
+          const usersRes = await api.get("/admin/users");
+          setUsers(usersRes.data);
+        }}
+        userToEdit={editingUser}
+      />
+      <Dialog open={isCouponModalOpen} onOpenChange={setIsCouponModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingCoupon ? "Edit Coupon" : "Add Coupon"}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSaveCoupon} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Coupon Code</label>
+              <Input
+                required
+                value={couponFormData.code}
+                onChange={(e) => setCouponFormData({ ...couponFormData, code: e.target.value.toUpperCase() })}
+                placeholder="SUMMER25"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type</label>
+                <select
+                  className="w-full p-2 border rounded-md bg-transparent"
+                  value={couponFormData.discount_type}
+                  onChange={(e) => setCouponFormData({ ...couponFormData, discount_type: e.target.value })}
+                >
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount (₹)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Value</label>
+                <Input
+                  required
+                  type="number"
+                  value={couponFormData.discount_value}
+                  onChange={(e) => setCouponFormData({ ...couponFormData, discount_value: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Min Order (₹)</label>
+                <Input
+                  type="number"
+                  value={couponFormData.min_order_value}
+                  onChange={(e) => setCouponFormData({ ...couponFormData, min_order_value: Number(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Max Disc (₹)</label>
+                <Input
+                  type="number"
+                  value={couponFormData.max_discount}
+                  onChange={(e) => setCouponFormData({ ...couponFormData, max_discount: Number(e.target.value) })}
+                  disabled={couponFormData.discount_type === 'fixed'}
+                  placeholder={couponFormData.discount_type === 'fixed' ? "N/A" : "Unlimited"}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Usage Limit</label>
+                <Input
+                  type="number"
+                  value={couponFormData.usage_limit}
+                  onChange={(e) => setCouponFormData({ ...couponFormData, usage_limit: Number(e.target.value) })}
+                  placeholder="0 for unlimited"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Expiry Date</label>
+                <Input
+                  type="date"
+                  value={couponFormData.expiry_date}
+                  onChange={(e) => setCouponFormData({ ...couponFormData, expiry_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full bg-electric-blue" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Coupon"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

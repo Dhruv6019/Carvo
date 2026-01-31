@@ -1,6 +1,7 @@
-import { Card } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Palette, Settings, Zap, Shield, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const FeatureCards = () => {
   const features = [
@@ -40,10 +41,10 @@ export const FeatureCards = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-display font-black text-foreground mb-6">
-            Transform Your <span className="bg-gradient-to-r from-electric-blue to-burnt-orange bg-clip-text text-transparent">Vehicle</span>
+            Fluid <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent">Modification</span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Professional modification services with cutting-edge technology and premium components
+            Immersive customization services with real-time liquid preview technology
           </p>
         </div>
 
@@ -51,52 +52,65 @@ export const FeatureCards = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
+            // Override colors for water theme
+            const waterColors = [
+              "from-cyan-400 to-blue-500",
+              "from-teal-400 to-emerald-500",
+              "from-blue-500 to-indigo-600",
+              "from-violet-500 to-purple-600"
+            ];
+
             return (
-              <Card 
-                key={index} 
-                className={`group p-8 ${feature.bgColor} border-0 card-hover cursor-pointer`}
+              <GlassCard
+                key={index}
+                variant="neon"
+                className="group p-8 cursor-pointer hover:border-cyan-400/50"
               >
                 <div className="space-y-6">
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                  <div className={`w-16 h-16 rounded-xl bg-gradient-to-r ${waterColors[index % 4]} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-300`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  
+
                   {/* Content */}
                   <div className="space-y-4">
-                    <h3 className="text-xl font-display font-bold text-foreground">
+                    <h3 className="text-xl font-display font-bold text-foreground group-hover:text-cyan-400 transition-colors duration-300">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-muted-foreground leading-relaxed group-hover:text-blue-200/80">
                       {feature.description}
                     </p>
                   </div>
-                  
+
                   {/* CTA */}
-                  <Button 
-                    variant="ghost" 
-                    className="group-hover:translate-x-2 transition-transform duration-300 p-0 h-auto text-electric-blue hover:bg-transparent"
-                  >
-                    Learn More
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  <Link to="/services">
+                    <Button
+                      variant="ghost"
+                      className="group-hover:translate-x-2 transition-transform duration-300 p-0 h-auto text-cyan-400 hover:bg-transparent hover:text-cyan-300"
+                    >
+                      Learn More
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
                 </div>
-              </Card>
+              </GlassCard>
             );
           })}
         </div>
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <Button 
-            size="lg"
-            className="bg-gradient-to-r from-electric-blue to-electric-blue-dark text-white font-semibold px-12 py-4 rounded-xl text-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
-          >
-            View All Services
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+          <Link to="/services">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold px-12 py-4 rounded-xl text-lg hover:shadow-water hover:scale-105 transition-all duration-300 border border-white/10"
+            >
+              Explore All Services
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
         </div>
-      </div>
-    </section>
+      </div >
+    </section >
   );
 };

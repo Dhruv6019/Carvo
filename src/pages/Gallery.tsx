@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,7 @@ const Gallery = () => {
       id: 2,
       title: "Red Chrome Ferrari 488",
       category: "paint",
-      image: "/placeholder.svg", 
+      image: "/placeholder.svg",
       client: "Sarah M.",
       likes: 189,
       views: 890,
@@ -81,14 +82,14 @@ const Gallery = () => {
     }
   ];
 
-  const filteredProjects = selectedCategory === "all" 
-    ? projects 
+  const filteredProjects = selectedCategory === "all"
+    ? projects
     : projects.filter(project => project.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       {/* Hero Section */}
       <AnimatedSection className="pt-24 pb-12 bg-gradient-to-b from-muted to-background mesh-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -127,8 +128,8 @@ const Gallery = () => {
             {filteredProjects.map((project, index) => (
               <Card key={project.id} className="group hover:shadow-xl hover-lift transition-all duration-500 overflow-hidden animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="relative">
-                  <img 
-                    src={project.image} 
+                  <img
+                    src={project.image}
                     alt={project.title}
                     className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -149,7 +150,7 @@ const Gallery = () => {
                 <CardContent className="p-6">
                   <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
                   <p className="text-muted-foreground mb-4">Client: {project.client}</p>
-                  
+
                   <div className="flex flex-wrap gap-1 mb-4">
                     {project.tags.map((tag, index) => (
                       <Badge key={index} variant="secondary" className="text-xs">
@@ -194,7 +195,8 @@ const Gallery = () => {
           </Button>
         </div>
       </section>
-    </div>
+      <Footer />
+    </div >
   );
 };
 

@@ -1,21 +1,27 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
-  MessageCircle, 
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  MessageCircle,
   Send,
   Car,
   Calendar,
   Quote
 } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import api from "@/lib/api";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
   const contactInfo = [
@@ -45,6 +51,54 @@ const Contact = () => {
     }
   ];
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    carModel: "",
+    category: "Inquiry",
+    message: ""
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("Please login to send a formal message or complaint.");
+      navigate("/login");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const subject = `[${formData.category}] ${formData.carModel ? formData.carModel : 'General Inquiry'}`;
+      await api.post("/support/complaints", {
+        subject: subject,
+        description: formData.message,
+        priority: formData.category === "Complaint" ? "high" : "medium"
+      });
+
+      toast.success("Your message has been sent to our support team!");
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        carModel: "",
+        category: "Inquiry",
+        message: ""
+      });
+    } catch (error) {
+      console.error("Error submitting contact form", error);
+      toast.error("Failed to send message. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const services = [
     {
       icon: Car,
@@ -66,7 +120,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       {/* Hero Section */}
       <AnimatedSection className="pt-24 pb-16 bg-gradient-to-b from-muted to-background mesh-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -74,7 +128,7 @@ const Contact = () => {
             Get In <span className="text-gradient">Touch</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Ready to transform your vehicle? We're here to help you every step of the way. 
+            Ready to transform your vehicle? We're here to help you every step of the way.
             Contact us today to discuss your project.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -114,7 +168,7 @@ const Contact = () => {
       <section className="py-16 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
-            
+
             {/* Contact Form */}
             <Card>
               <CardHeader>
@@ -123,68 +177,103 @@ const Contact = () => {
                   Fill out the form below and we'll get back to you within 24 hours.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="John" />
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Doe"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        required
+                      />
+                    </div>
                   </div>
+
                   <div>
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Doe" />
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="john@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
                   </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="john@example.com" />
-                </div>
-                
-                <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="+1 (555) 123-4567" />
-                </div>
-                
-                <div>
-                  <Label htmlFor="carModel">Car Model (Optional)</Label>
-                  <Input id="carModel" placeholder="e.g., BMW M3, Tesla Model S" />
-                </div>
-                
-                <div>
-                  <Label htmlFor="serviceType">Service Type</Label>
-                  <select 
-                    id="serviceType" 
-                    className="w-full p-2 border border-border rounded-md bg-background"
-                  >
-                    <option>Select a service</option>
-                    <option>Custom Paint Job</option>
-                    <option>Alloy Wheels</option>
-                    <option>Interior Modification</option>
-                    <option>Performance Upgrade</option>
-                    <option>Complete Makeover</option>
-                    <option>Consultation Only</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea 
-                    id="message" 
-                    placeholder="Tell us about your project, budget, and timeline..."
-                    rows={5}
-                  />
-                </div>
-                
-                <Button className="w-full bg-gradient-electric text-lg py-6">
-                  <Send className="w-5 h-5 mr-2" />
-                  Send Message
-                </Button>
+
+                  <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="carModel">Car Model (Optional)</Label>
+                    <Input
+                      id="carModel"
+                      placeholder="e.g., BMW M3, Tesla Model S"
+                      value={formData.carModel}
+                      onChange={(e) => setFormData({ ...formData, carModel: e.target.value })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <select
+                      id="category"
+                      className="w-full p-2 border border-border rounded-md bg-background"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    >
+                      <option value="Inquiry">General Inquiry</option>
+                      <option value="Feedback">Feedback</option>
+                      <option value="Complaint">Complaint</option>
+                      <option value="Project">Project Inquiry</option>
+                      <option value="Support">Technical Support</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us about your project, budget, and timeline..."
+                      rows={5}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full bg-gradient-electric text-lg py-6" disabled={loading}>
+                    <Send className={`w-5 h-5 mr-2 ${loading ? 'animate-pulse' : ''}`} />
+                    {loading ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
 
             {/* Services & Map */}
             <div className="space-y-8">
-              
+
               {/* Services */}
               <Card>
                 <CardHeader>
@@ -255,7 +344,7 @@ const Contact = () => {
               Quick answers to common questions
             </p>
           </div>
-          
+
           <div className="space-y-6">
             {[
               {
@@ -285,7 +374,8 @@ const Contact = () => {
           </div>
         </div>
       </section>
-    </div>
+      <Footer />
+    </div >
   );
 };
 

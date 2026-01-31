@@ -1,12 +1,17 @@
-import React from "react";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import React, { useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface AnimatedSectionProps {
   children: React.ReactNode;
   className?: string;
   animation?: "fadeInUp" | "slideInLeft" | "slideInRight" | "scaleIn";
   delay?: number;
+  duration?: number;
 }
 
 export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
@@ -14,27 +19,48 @@ export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   className,
   animation = "fadeInUp",
   delay = 0,
+  duration = 0.2,
 }) => {
-  const { ref, isVisible } = useScrollAnimation();
+  const ref = useRef<HTMLElement>(null);
 
-  const animationClass = {
-    fadeInUp: "animate-fade-in-up",
-    slideInLeft: "animate-slide-in-left", 
-    slideInRight: "animate-slide-in-right",
-    scaleIn: "animate-scale-in",
-  }[animation];
+  useGSAP(() => {
+    const element = ref.current;
+    if (!element) return;
 
-  const delayClass = delay > 0 ? `animate-delay-${delay}` : "";
+    const fromVars: gsap.TweenVars = {
+      opacity: 0,
+      duration: duration,
+      delay: delay / 1000,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: element,
+        start: "top 100%",
+        toggleActions: "play none none reverse",
+      },
+    };
+
+    switch (animation) {
+      case "fadeInUp":
+        fromVars.y = 50;
+        break;
+      case "slideInLeft":
+        fromVars.x = -50;
+        break;
+      case "slideInRight":
+        fromVars.x = 50;
+        break;
+      case "scaleIn":
+        fromVars.scale = 0.8;
+        break;
+    }
+
+    gsap.from(element, fromVars);
+  }, { scope: ref, dependencies: [animation, delay, duration] });
 
   return (
     <section
       ref={ref}
-      className={cn(
-        "opacity-0",
-        isVisible && animationClass,
-        delayClass,
-        className
-      )}
+      className={cn("will-change-transform", className)}
     >
       {children}
     </section>

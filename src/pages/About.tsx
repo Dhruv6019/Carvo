@@ -1,4 +1,5 @@
 import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,7 @@ const About = () => {
     {
       name: "Sarah Chen",
       role: "Lead Designer",
-      image: "/placeholder.svg", 
+      image: "/placeholder.svg",
       bio: "Award-winning designer specializing in luxury car aesthetics"
     },
     {
@@ -61,7 +62,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       {/* Hero Section */}
       <AnimatedSection className="pt-24 pb-16 bg-gradient-to-b from-muted to-background mesh-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,7 +72,7 @@ const About = () => {
                 Crafting <span className="text-gradient">Dreams</span> Since 2016
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                We are passionate automotive artisans who transform ordinary vehicles into extraordinary masterpieces. 
+                We are passionate automotive artisans who transform ordinary vehicles into extraordinary masterpieces.
                 Every project is a canvas for innovation, precision, and uncompromising quality.
               </p>
               <Button size="lg" className="bg-gradient-electric text-lg px-8">
@@ -79,8 +80,8 @@ const About = () => {
               </Button>
             </div>
             <div className="relative">
-              <img 
-                src="/placeholder.svg" 
+              <img
+                src="/placeholder.svg"
                 alt="Our Workshop"
                 className="rounded-2xl shadow-2xl"
               />
@@ -122,21 +123,21 @@ const About = () => {
               From a small garage to industry leaders
             </p>
           </div>
-          
+
           <div className="prose prose-lg max-w-none text-muted-foreground">
             <p className="text-lg leading-relaxed mb-6">
-              It all started in 2016 when our founder, Alex Rodriguez, transformed his first car in a small garage. 
-              What began as a passion project quickly evolved into something much bigger when friends and neighbors 
+              It all started in 2016 when our founder, Alex Rodriguez, transformed his first car in a small garage.
+              What began as a passion project quickly evolved into something much bigger when friends and neighbors
               started asking for similar transformations.
             </p>
             <p className="text-lg leading-relaxed mb-6">
-              Today, we've grown into one of the most trusted names in car modification, serving thousands of 
-              customers across the country. Our team combines traditional craftsmanship with cutting-edge 
+              Today, we've grown into one of the most trusted names in car modification, serving thousands of
+              customers across the country. Our team combines traditional craftsmanship with cutting-edge
               technology to deliver results that exceed expectations.
             </p>
             <p className="text-lg leading-relaxed">
-              Every car that comes through our doors is treated as a unique canvas. We don't just modify cars; 
-              we bring visions to life, create memories, and help our customers express their personality 
+              Every car that comes through our doors is treated as a unique canvas. We don't just modify cars;
+              we bring visions to life, create memories, and help our customers express their personality
               through their vehicles.
             </p>
           </div>
@@ -152,7 +153,7 @@ const About = () => {
               The principles that drive everything we do
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {values.map((value, index) => (
               <Card key={index} className="text-center">
@@ -176,13 +177,13 @@ const About = () => {
               The passionate experts behind every transformation
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
-                  <img 
-                    src={member.image} 
+                  <img
+                    src={member.image}
                     alt={member.name}
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
                   />
@@ -206,16 +207,17 @@ const About = () => {
             Join the thousands of satisfied customers who chose us to bring their vision to life.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-electric text-lg px-8">
+            <Button size="lg" className="bg-gradient-electric text-lg px-8" onClick={() => window.location.href = '/contact'}>
               Start Your Project
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8">
-              View Our Work
+            <Button size="lg" variant="outline" className="text-lg px-8" onClick={() => window.location.href = '/contact'}>
+              Give Feedback
             </Button>
           </div>
         </div>
       </section>
-    </div>
+      <Footer />
+    </div >
   );
 };
 

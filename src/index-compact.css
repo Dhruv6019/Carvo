@@ -1,0 +1,24 @@
+﻿/* Update minimal category styling for more compact design */
+.minimal-category-item {
+  transition: all 0.15s ease;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.minimal-category-item:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.minimal-category-item.active {
+  background: transparent;
+  color: #111827;
+  font-weight: 500;
+  border-left: 2px solid #111827;
+  padding-left: calc(0.75rem - 2px);
+}
+
+.minimal-category-item.active .text-gray-400 {
+  color: #6b7280;
+  font-weight: 500;
+}
