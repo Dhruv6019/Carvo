@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Generated files
+*.i
+*.ii
+*.gpu
+*.ptx
+*.cubin
+*.fatbin

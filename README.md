@@ -1,73 +1,67 @@
-# Welcome to your Lovable project
+# Carvo - The Ultimate Car Customization Platform
 
-## Project info
+Carvo is a comprehensive marketplace and visualization platform dedicated to car enthusiasts. It allows users to customize vehicles in real-time using 3D tools, purchase parts from a vast catalog, and book professional services.
 
-**URL**: https://lovable.dev/projects/52e9c8c5-5350-4bb6-aa1d-6deee10c5b40
+## 🚀 Features
 
-## How can I edit this code?
+- **Interactive 3D Customization**: Visualize modifications with our "Fluid Modification" and 3D viewer tools.
+- **E-Commerce Marketplace**: Browse 10,000+ products across 400+ categories.
+- **Service Booking**: Schedule mechanics and customization experts.
+- **Role-Based Dashboards**: Dedicated interfaces for:
+  - Customers
+  - Sellers
+  - Service Providers
+  - Delivery Personnel
+  - Admins
+- **Secure Authentication**: Google Login and JWT-based auth.
+- **Payment Integration**: Secure checkout with UPI support.
 
-There are several ways of editing your application.
+## 🛠️ Technology Stack
 
-**Use Lovable**
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn-ui
+- **Backend**: Node.js, Express
+- **Database**: MySQL/MariaDB (via TypeORM)
+- **3D Graphics**: React Three Fiber / Three.js
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/52e9c8c5-5350-4bb6-aa1d-6deee10c5b40) and start prompting.
+## 📦 Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/dhruv6019/carvo.git
+    cd carvo
+    ```
 
-**Use your preferred IDE**
+2.  **Install Dependencies**
+    ```bash
+    # Install frontend dependencies
+    npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+    # Install backend dependencies
+    cd server
+    npm install
+    ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3.  **Environment Setup**
+    - Create a `.env` file in the `server` directory based on `.env.example`.
+    - Configure your database credentials.
 
-Follow these steps:
+4.  **Run the Application**
+    ```bash
+    # Run both client and server (from root)
+    npm run dev
+    ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🤝 Contributing
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📞 Contact & Author
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+**Dhruv Teli**
+- **Phone**: +91 87585 41064
+- **Email**: dhruv.teli@example.com
+- **Role**: Lead Developer / Creator
 
-**Edit a file directly in GitHub**
+## 📄 License
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/52e9c8c5-5350-4bb6-aa1d-6deee10c5b40) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
