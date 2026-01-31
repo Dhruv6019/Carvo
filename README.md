@@ -55,6 +55,12 @@ Carvo is a comprehensive marketplace and visualization platform dedicated to car
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## 📞 Contact & Author
+**Dhruv Teli**
+- **Phone**: +91 87585 41064
+- **Email**: dhruvteli6019@gmail.com
+- **Role**: Lead Developer / Creator
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
