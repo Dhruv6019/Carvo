@@ -30,4 +30,7 @@ export class Customization {
 
     @CreateDateColumn()
     created_at!: Date;
+
+    @Column({ type: "simple-enum", enum: ["pending", "reviewed", "approved", "rejected"], default: "pending" })
+    status!: string;
 }

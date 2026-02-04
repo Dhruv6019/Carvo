@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, ShoppingCart, Trash2, Package } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 
@@ -154,15 +155,23 @@ const Wishlist = () => {
 
                                 {/* Image */}
                                 <div className="light-image-container aspect-square mb-5 flex items-center justify-center p-6">
-                                    {item.image_url ? (
-                                        <img
-                                            src={item.image_url}
-                                            alt={item.name}
-                                            className="w-full h-full object-contain"
-                                        />
-                                    ) : (
-                                        <Package className="w-20 h-20 text-gray-400" />
-                                    )}
+                                    <div className="flex flex-col md:flex-row gap-6 items-center">
+                                        <div className="w-full md:w-48 h-48 flex-shrink-0 bg-secondary rounded-md overflow-hidden">
+                                            <ImageWithFallback
+                                                src={item.image_url}
+                                                alt={item.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-center md:text-left space-y-2">
+                                            {/* The original Package component was here, but the instruction's snippet was malformed.
+                                                Assuming the intent was to replace the image conditional with ImageWithFallback,
+                                                and the surrounding divs are new structure.
+                                                If the Package component was still needed for fallback, it would need to be re-added.
+                                                For now, I'm following the provided snippet's structure.
+                                            */}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Info */}

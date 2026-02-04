@@ -59,6 +59,14 @@ export class CustomerController {
             customization.id
         );
 
+        // ✅ Notify Admins
+        await NotificationService.notifyAllAdmins(
+            NotificationType.CUSTOMIZATION_APPROVED,
+            "New Customization Request",
+            `User ${userId} created a new customization "${name}".`,
+            customization.id
+        );
+
         // 📧 Send Email: Customization Saved
         const user = await AppDataSource.getRepository(User).findOne({ where: { id: userId } });
         if (user) {
@@ -95,6 +103,14 @@ export class CustomerController {
             NotificationType.ORDER_UPDATE,
             "Booking Confirmed",
             `Your ${serviceType} service has been booked for ${formattedDate}. We'll notify you once a provider is assigned.`,
+            booking.id
+        );
+
+        // ✅ Notify Admins
+        await NotificationService.notifyAllAdmins(
+            NotificationType.ORDER_UPDATE,
+            "New Service Booking",
+            `New Booking #${booking.id}: ${serviceType} on ${formattedDate}.`,
             booking.id
         );
 

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from "typeorm";
 import { User } from "./User";
 import { Customization } from "./Customization";
 
@@ -6,6 +6,7 @@ export enum QuotationStatus {
     PENDING = "pending",
     ACCEPTED = "accepted",
     REJECTED = "rejected",
+    COMPLETED = "completed",
 }
 
 @Entity()
@@ -35,7 +36,11 @@ export class Quotation {
     estimated_price!: number;
 
     @Column({ type: "simple-enum", enum: QuotationStatus, default: QuotationStatus.PENDING })
+    @Column({ type: "simple-enum", enum: QuotationStatus, default: QuotationStatus.PENDING })
     status!: QuotationStatus;
+
+    @OneToMany(() => require("./Payment").Payment, (payment: any) => payment.quotation)
+    payments!: any[];
 
     @CreateDateColumn()
     created_at!: Date;

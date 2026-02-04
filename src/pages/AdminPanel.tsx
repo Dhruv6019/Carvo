@@ -23,7 +23,12 @@ import {
   ChevronRight,
   Puzzle,
   ChevronDown,
-  Settings
+  Settings,
+  FileText,
+  Calendar,
+  CheckCircle,
+  FileCode,
+  Image as ImageIcon
 } from "lucide-react";
 import api from "@/lib/api";
 import { exportToCSV } from "@/lib/utils";
@@ -38,6 +43,7 @@ import {
 import { RevenueChart } from "@/components/Admin/RevenueChart";
 import { ModulesView } from "@/components/Admin/ModulesView";
 import { AddModuleUserModal } from "@/components/Admin/AddModuleUserModal";
+import { GalleryManagement } from "@/components/Admin/GalleryManagement";
 
 export const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -64,6 +70,9 @@ export const AdminPanel = () => {
 
   const [cars, setCars] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const [customizations, setCustomizations] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [quotations, setQuotations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingOrder, setViewingOrder] = useState<any>(null);
   const [editingUser, setEditingUser] = useState<any>(null);
@@ -298,6 +307,16 @@ export const AdminPanel = () => {
         // Fetch Settings
         await fetchSettings();
 
+        // Fetch Interactions
+        const custRes = await api.get("/admin/customizations");
+        setCustomizations(custRes.data);
+
+        const bookRes = await api.get("/admin/bookings");
+        setBookings(bookRes.data);
+
+        const quoteRes = await api.get("/admin/quotations");
+        setQuotations(quoteRes.data); // Assuming Quotations API is implemented or using same endpoint if combined
+
       } catch (error) {
         console.error("Error fetching admin data", error);
         toast.error("Failed to load admin data");
@@ -353,8 +372,16 @@ export const AdminPanel = () => {
             <TabsTrigger value="settings" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
               <Settings className="w-5 h-5 mr-3" /> Settings
             </TabsTrigger>
-            <TabsTrigger value="settings" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
-              <Settings className="w-5 h-5 mr-3" /> Settings
+
+            <div className="pt-4 pb-2 px-4 text-xs font-semibold text-muted-foreground uppercase">Interactions</div>
+            <TabsTrigger value="customizations" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <FileCode className="w-5 h-5 mr-3" /> Customizations
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <Calendar className="w-5 h-5 mr-3" /> Bookings
+            </TabsTrigger>
+            <TabsTrigger value="quotations" className="w-full justify-start px-4 py-3 h-auto text-base font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all rounded-lg">
+              <FileText className="w-5 h-5 mr-3" /> Quotations
             </TabsTrigger>
           </TabsList>
         </aside>
@@ -760,8 +787,237 @@ export const AdminPanel = () => {
                   </div>
                 </Card>
               </div>
+
+              <div className="mt-8">
+                <GalleryManagement />
+              </div>
             </TabsContent>
 
+
+            {/* NEW INTERACTION TABS */}
+
+            <TabsContent value="customizations" className="mt-0 space-y-6">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-foreground">Customizations</h2>
+                <p className="text-muted-foreground">Review and acknowledge car configuration requests</p>
+              </div>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                <div className="divide-y">
+                  {customizations.length === 0 ? <div className="p-8 text-center text-muted-foreground">No customization requests found</div> :
+                    customizations.map((cust) => (
+                      <div key={cust.id} className="p-6 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-lg">{cust.name}</h3>
+                              <Badge variant={cust.status === 'approved' ? 'default' : cust.status === 'reviewed' ? 'secondary' : 'outline'}>
+                                {cust.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-foreground mb-1">Customer: <span className="font-medium">{cust.customer?.name}</span> ({cust.customer?.email})</p>
+                            <p className="text-sm text-muted-foreground">Model: {cust.car?.make} {cust.car?.model}</p>
+
+                            {/* Configuration Summary - Visual */}
+                            <div className="mt-3 p-4 bg-white/50 dark:bg-black/20 border rounded-xl space-y-3">
+                              {(() => {
+                                try {
+                                  const config = typeof cust.configuration === 'string'
+                                    ? JSON.parse(cust.configuration)
+                                    : cust.configuration;
+
+                                  return (
+                                    <>
+                                      {config.colors && Array.isArray(config.colors) && config.colors.length > 0 && (
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-16">Colors</span>
+                                          <div className="flex gap-2">
+                                            {config.colors.map((color: string, i: number) => (
+                                              <div
+                                                key={i}
+                                                className="w-6 h-6 rounded-full border shadow-sm ring-1 ring-black/5"
+                                                style={{ backgroundColor: color }}
+                                                title={color}
+                                              />
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {config.parts && Array.isArray(config.parts) && config.parts.length > 0 && (
+                                        <div className="flex items-start gap-3">
+                                          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-16 pt-1">Parts</span>
+                                          <div className="flex flex-wrap gap-2">
+                                            {config.parts.map((partId: number, i: number) => (
+                                              <Badge key={i} variant="outline" className="bg-background">
+                                                Part #{partId}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {!config.colors?.length && !config.parts?.length && (
+                                        <p className="text-sm text-muted-foreground italic">No specific configuration details</p>
+                                      )}
+                                    </>
+                                  );
+                                } catch (e) {
+                                  return <pre className="whitespace-pre-wrap text-xs text-red-400">Error parsing config</pre>;
+                                }
+                              })()}
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {cust.status === 'pending' && (
+                              <Button size="sm" onClick={async () => {
+                                try {
+                                  await api.put(`/admin/customizations/${cust.id}/status`, { status: 'reviewed' });
+                                  toast.success("Marked as Reviewed");
+                                  const res = await api.get("/admin/customizations");
+                                  setCustomizations(res.data);
+                                } catch (e) { toast.error("Failed to update status"); }
+                              }}>
+                                <CheckCircle className="w-4 h-4 mr-2" /> Acknowledge
+                              </Button>
+                            )}
+                            {cust.status === 'reviewed' && (
+                              <Button size="sm" variant="default" className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                                try {
+                                  await api.put(`/admin/customizations/${cust.id}/status`, { status: 'approved' });
+                                  toast.success("Approved Customization");
+                                  const res = await api.get("/admin/customizations");
+                                  setCustomizations(res.data);
+                                } catch (e) { toast.error("Failed to update status"); }
+                              }}>
+                                Approve & Notify
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="bookings" className="mt-0 space-y-6">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-foreground">Service Bookings</h2>
+                <p className="text-muted-foreground">Manage service appointments</p>
+              </div>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                <div className="divide-y">
+                  {bookings.length === 0 ? <div className="p-8 text-center text-muted-foreground">No bookings found</div> :
+                    bookings.map((booking) => (
+                      <div key={booking.id} className="p-6 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-lg">{booking.service_type}</h3>
+                              <Badge variant={booking.status === 'confirmed' ? 'default' : booking.status === 'completed' ? 'secondary' : 'outline'}>
+                                {booking.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-foreground mb-1">Customer: <span className="font-medium">{booking.customer?.name}</span></p>
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                              <Calendar className="w-4 h-4" /> {new Date(booking.scheduled_date).toLocaleDateString()}
+                            </p>
+                            {booking.notes && <p className="text-sm text-muted-foreground mt-2 italic">"{booking.notes}"</p>}
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {booking.status === 'pending' && (
+                              <Button size="sm" onClick={async () => {
+                                try {
+                                  await api.put(`/admin/bookings/${booking.id}/status`, { status: 'confirmed' });
+                                  toast.success("Booking Confirmed");
+                                  const res = await api.get("/admin/bookings");
+                                  setBookings(res.data);
+                                } catch (e) { toast.error("Failed to update status"); }
+                              }}>
+                                <CheckCircle className="w-4 h-4 mr-2" /> Confirm
+                              </Button>
+                            )}
+                            {booking.status === 'confirmed' && (
+                              <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={async () => {
+                                if (confirm("Mark service as Completed? This will process provider commission and send invoice.")) {
+                                  try {
+                                    await api.put(`/admin/bookings/${booking.id}/status`, { status: 'completed' });
+                                    toast.success("Service Completed! Commission Distributed.");
+                                    const res = await api.get("/admin/bookings");
+                                    setBookings(res.data);
+                                  } catch (e) { toast.error("Failed to complete service"); }
+                                }
+                              }}>
+                                <CheckCircle className="w-4 h-4 mr-2" /> Mark Done
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="quotations" className="mt-0 space-y-6">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-foreground">Payment Requests</h2>
+                <p className="text-muted-foreground">Handle payment overview requests and quotations</p>
+              </div>
+              <Card className="p-0 overflow-hidden border-none shadow-sm">
+                <div className="divide-y">
+                  {quotations.length === 0 ? <div className="p-8 text-center text-muted-foreground">No quotation requests found</div> :
+                    quotations.map((quote) => (
+                      <div key={quote.id} className="p-6 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-lg">Quote #{quote.id}</h3>
+                              <Badge variant={quote.status === 'accepted' ? 'secondary' : quote.status === 'completed' ? 'default' : 'outline'}>
+                                {quote.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-foreground mb-1">For Customization: <strong>{quote.customization?.name || 'N/A'}</strong></p>
+                            <p className="text-sm text-muted-foreground">Customer: {quote.customer?.name}</p>
+                            {quote.estimated_price && <p className="text-lg font-bold text-green-600 mt-2">Est. Price: ₹{Number(quote.estimated_price).toLocaleString()}</p>}
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {quote.status === 'pending' && (
+                              <Button size="sm" onClick={async () => {
+                                const price = prompt("Enter estimated price for this quote:");
+                                if (price) {
+                                  try {
+                                    await api.put(`/admin/quotations/${quote.id}/status`, { status: 'accepted', estimated_price: parseFloat(price) });
+                                    toast.success("Quotation Sent");
+                                    const res = await api.get("/admin/quotations");
+                                    setQuotations(res.data);
+                                  } catch (e) { toast.error("Failed to send quote"); }
+                                }
+                              }}>
+                                <DollarSign className="w-4 h-4 mr-2" /> Send Quote
+                              </Button>
+                            )}
+                            {quote.status === 'accepted' && (
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                                if (confirm("Mark this as Completed? This will record payment, distribute commissions, and send invoice.")) {
+                                  try {
+                                    await api.put(`/admin/quotations/${quote.id}/status`, { status: 'completed' });
+                                    toast.success("Marked Completed! Commission Distributed.");
+                                    const res = await api.get("/admin/quotations");
+                                    setQuotations(res.data);
+                                  } catch (e) { toast.error("Failed to complete"); }
+                                }
+                              }}>
+                                <CheckCircle className="w-4 h-4 mr-2" /> Mark Completed
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </Card>
+            </TabsContent>
 
           </div>
         </div>

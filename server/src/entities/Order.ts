@@ -57,6 +57,9 @@ export class Order {
     @OneToMany(() => OrderItem, (item) => item.order)
     items!: OrderItem[];
 
+    @OneToMany(() => require("./Payment").Payment, (payment: any) => payment.order)
+    payments!: any[];
+
     @OneToOne("Invoice", (invoice: any) => invoice.order)
     invoice!: any;
 

@@ -3,6 +3,8 @@ import { AppDataSource } from "../config/data-source";
 import { Notification, NotificationType } from "../entities/Notification";
 import { SystemSetting } from "../entities/SystemSetting";
 
+import { User, UserRole } from "../entities/User";
+
 class NotificationService {
     private transporter: nodemailer.Transporter | null = null;
 
@@ -112,6 +114,26 @@ class NotificationService {
         } catch (error) {
             console.error("❌ Notification creation error:", error);
             throw error;
+        }
+    }
+
+    async notifyAllAdmins(type: NotificationType, title: string, message: string, relatedEntityId?: number) {
+        try {
+            const userRepository = AppDataSource.getRepository(User);
+            // Assuming 'admin' is the role string. Adjust if enum is used (UserRole.ADMIN).
+            // Using raw string 'admin' based on previous checks, but should verify UserRole import if possible.
+            // Let's safe-guard by importing UserRole if we can, or strict string 'admin'.
+            // Looking at User.ts imports in other files, UserRole is available.
+            // But to minimize import churn in Service, I will look up users where role = 'admin'.
+
+            const admins = await userRepository.find({ where: { role: UserRole.ADMIN } });
+
+            for (const admin of admins) {
+                await this.createNotification(admin.id, type, title, message, relatedEntityId);
+            }
+            console.log(`📢 Notified ${admins.length} admins: ${title}`);
+        } catch (error) {
+            console.error("Failed to notify admins:", error);
         }
     }
 

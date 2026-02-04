@@ -93,21 +93,30 @@ const DeliveryDashboard = () => {
                                                 {order.shipping_address}
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1">Status: {order.status}</p>
+
+                                            {/* COD Payment Badge */}
+                                            {order.payments?.some((p: any) => p.method === 'cod' && p.status === 'pending') && (
+                                                <Badge variant="destructive" className="mt-2 animate-pulse">
+                                                    Collect Cash: ₹{order.final_amount || order.total_amount}
+                                                </Badge>
+                                            )}
                                         </div>
                                     </div>
-                                    <Button variant="outline" onClick={() => setViewingOrder(order)}>
-                                        View Details
-                                    </Button>
-                                    {order.status === 'shipped' && (
-                                        <Button onClick={() => handleStartDelivery(order.id)} className="bg-blue-500 hover:bg-blue-600">
-                                            Start Delivery
+                                    <div className="flex flex-col gap-2">
+                                        <Button variant="outline" onClick={() => setViewingOrder(order)}>
+                                            View Details
                                         </Button>
-                                    )}
-                                    {order.status === 'out_for_delivery' && (
-                                        <Button onClick={() => setVerifyingOrder(order)} className="bg-green-500 hover:bg-green-600">
-                                            Verify OTP
-                                        </Button>
-                                    )}
+                                        {order.status === 'shipped' && (
+                                            <Button onClick={() => handleStartDelivery(order.id)} className="bg-blue-500 hover:bg-blue-600">
+                                                Start Delivery
+                                            </Button>
+                                        )}
+                                        {order.status === 'out_for_delivery' && (
+                                            <Button onClick={() => setVerifyingOrder(order)} className="bg-green-500 hover:bg-green-600">
+                                                Verify OTP & Deliver
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                             {assignments.length === 0 && <p className="text-center text-muted-foreground py-8">No active delivery assignments.</p>}
@@ -154,6 +163,11 @@ const DeliveryDashboard = () => {
                     <DialogHeader>
                         <DialogTitle>Verify Delivery - Order #{verifyingOrder?.id}</DialogTitle>
                         <DialogDescription>Please enter the 6-digit OTP provided by the customer.</DialogDescription>
+                        {verifyingOrder?.payments?.some((p: any) => p.method === 'cod' && p.status === 'pending') && (
+                            <div className="bg-red-50 text-red-600 p-3 rounded-md mt-2 text-sm font-bold border border-red-200">
+                                ⚠️ Cash on Delivery: Please collect ₹{verifyingOrder.final_amount || verifyingOrder.total_amount} before completing!
+                            </div>
+                        )}
                     </DialogHeader>
                     <div className="py-6 space-y-4">
                         <div className="flex justify-center">

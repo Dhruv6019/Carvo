@@ -10,7 +10,7 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
     return (
         <Card className="col-span-4 transition-all hover:shadow-lg border-none shadow-none">
             {/* Removing Card wrapper here if parent already has Card, but keeping consistent styling */}
-            <div className="h-[300px] w-full">
+            <div className="h-[450px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                         <defs>
@@ -26,6 +26,7 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
+                            padding={{ left: 20, right: 20 }}
                         />
                         <YAxis
                             stroke="#888888"
@@ -33,6 +34,8 @@ export const RevenueChart = ({ data }: RevenueChartProps) => {
                             tickLine={false}
                             axisLine={false}
                             tickFormatter={(value) => `₹${value}`}
+                            domain={['auto', 'auto']}
+                            padding={{ top: 30, bottom: 0 }}
                         />
                         <Tooltip
                             contentStyle={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb' }}

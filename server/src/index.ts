@@ -49,6 +49,10 @@ app.use("/coupons", couponRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/upload", uploadRoutes);
+
+import galleryRoutes from "./routes/gallery.routes";
+app.use("/gallery", galleryRoutes);
+
 import invoiceRoutes from "./routes/invoice.routes";
 app.use("/invoices", invoiceRoutes);
 import seedRoutes from "./routes/seed.routes";

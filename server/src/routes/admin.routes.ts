@@ -18,6 +18,16 @@ router.post("/cars", AdminController.createCar);
 router.put("/cars/:id", AdminController.updateCar);
 router.delete("/cars/:id", AdminController.deleteCar);
 
+// New Interaction Routes
+router.get("/customizations", AdminController.getCustomizations);
+router.put("/customizations/:id/status", AdminController.updateCustomizationStatus);
+
+router.get("/bookings", AdminController.getBookings);
+router.put("/bookings/:id/status", AdminController.updateBookingStatus);
+
+router.get("/quotations", AdminController.getQuotations);
+router.put("/quotations/:id/status", AdminController.updateQuotationStatus);
+
 router.post("/categories", AdminController.createCategory);
 
 router.get("/analytics", AdminController.getAnalytics);

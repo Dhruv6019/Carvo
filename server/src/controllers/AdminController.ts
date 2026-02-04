@@ -11,7 +11,164 @@ import bcrypt from "bcryptjs";
 import NotificationService from "../services/NotificationService";
 import { NotificationType } from "../entities/Notification";
 
+import { Customization } from "../entities/Customization";
+
 export class AdminController {
+    // Customization Management
+    static async getCustomizations(req: Request, res: Response) {
+        const customizations = await AppDataSource.getRepository(Customization).find({
+            relations: ["customer", "car"],
+            order: { created_at: "DESC" }
+        });
+        return res.json(customizations);
+    }
+
+    static async updateCustomizationStatus(req: Request, res: Response) {
+        const repo = AppDataSource.getRepository(Customization);
+        const customization = await repo.findOne({ where: { id: parseInt(req.params.id) }, relations: ["customer"] });
+        if (!customization) return res.status(404).json({ message: "Customization not found" });
+
+        const { status } = req.body;
+        customization.status = status;
+        await repo.save(customization);
+
+        // Notify User
+        if (status === "reviewed" || status === "approved") {
+            await NotificationService.createNotification(
+                customization.customerId,
+                NotificationType.CUSTOMIZATION_APPROVED,
+                "Customization Update",
+                `Your customization "${customization.name}" has been marked as ${status}.`,
+                customization.id
+            );
+        }
+
+        return res.json(customization);
+    }
+
+    // Booking Management
+    static async getBookings(req: Request, res: Response) {
+        const bookings = await AppDataSource.getRepository(Booking).find({
+            relations: ["customer", "provider", "quotation"],
+            order: { created_at: "DESC" }
+        });
+        return res.json(bookings);
+    }
+
+    static async updateBookingStatus(req: Request, res: Response) {
+        const repo = AppDataSource.getRepository(Booking);
+        const booking = await repo.findOne({ where: { id: parseInt(req.params.id) }, relations: ["customer"] });
+        if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+        const { status } = req.body;
+        booking.status = status;
+        await repo.save(booking);
+
+        // Notify User
+        await NotificationService.createNotification(
+            booking.customerId,
+            NotificationType.ORDER_UPDATE,
+            "Booking Update",
+            `Your booking status has been updated to ${status}.`,
+            booking.id
+        );
+
+        return res.json(booking);
+    }
+
+    // Quotation Management
+    static async getQuotations(req: Request, res: Response) {
+        const quotations = await AppDataSource.getRepository(Quotation).find({
+            relations: ["customer", "customization"],
+            order: { created_at: "DESC" }
+        });
+        return res.json(quotations);
+    }
+
+    static async updateQuotationStatus(req: Request, res: Response) {
+        const repo = AppDataSource.getRepository(Quotation);
+        const quotation = await repo.findOne({ where: { id: parseInt(req.params.id) }, relations: ["customer", "customization"] });
+        if (!quotation) return res.status(404).json({ message: "Quotation not found" });
+
+        const { status, estimated_price } = req.body;
+        if (status) quotation.status = status;
+        if (estimated_price) quotation.estimated_price = estimated_price;
+
+        await repo.save(quotation);
+
+        // --- COMMISSION & INVOICE LOGIC FOR COMPLETED QUOTATIONS ---
+        if (status === 'completed') { // Using string literal or QuotationStatus.COMPLETED
+            // Check for Payment
+            const paymentRepository = AppDataSource.getRepository(require("../entities/Payment").Payment);
+            // Check if a payment exists for this quotation
+            let payment = await paymentRepository.findOne({ where: { quotationId: quotation.id } });
+
+            // If no payment record exists, creating one (assuming Cash/Direct settlement)
+            let verifiedPayment = payment;
+
+            if (!verifiedPayment) {
+                const PaymentEntity = require("../entities/Payment").Payment;
+                const newPayment = new PaymentEntity();
+                newPayment.quotationId = quotation.id;
+                newPayment.amount = Number(quotation.estimated_price || 0);
+                newPayment.method = 'manual_settlement';
+                newPayment.status = 'completed';
+                await paymentRepository.save(newPayment);
+                verifiedPayment = newPayment;
+            } else if (verifiedPayment.status !== 'completed') {
+                verifiedPayment.status = 'completed';
+                await paymentRepository.save(verifiedPayment);
+            }
+
+            const totalAmount = Number(verifiedPayment?.amount || 0);
+            if (totalAmount > 0) {
+                const transactionRepository = AppDataSource.getRepository(require("../entities/Transaction").Transaction);
+                const ADMIN_RATE = 0.10;
+                const SHOP_RATE = 0.90;
+
+                // 1. Admin Commission
+                await transactionRepository.save({
+                    userId: 1, // Admin
+                    amount: totalAmount * ADMIN_RATE,
+                    type: 'credit',
+                    source: 'commission',
+                    description: `Platform Fee for Quotation #${quotation.id}`
+                });
+
+                // 2. Shop/Provider Earnings
+                if (quotation.providerId) {
+                    await transactionRepository.save({
+                        userId: quotation.providerId,
+                        amount: totalAmount * SHOP_RATE,
+                        type: 'credit',
+                        source: 'commission',
+                        description: `Earnings for Quotation #${quotation.id}`,
+                    });
+                }
+            }
+
+            // Send Invoice/Notification
+            await NotificationService.createNotification(
+                quotation.customerId,
+                NotificationType.ORDER_UPDATE,
+                "Quotation Completed",
+                `Your quotation for ${quotation.customization?.name || 'customization'} has been marked as completed & paid.`,
+                quotation.id
+            );
+        } else {
+            // Notify User for other status updates
+            await NotificationService.createNotification(
+                quotation.customerId,
+                NotificationType.ORDER_UPDATE,
+                "Quotation Update",
+                `Your quotation for ${quotation.customization?.name || 'customization'} has been updated to ${status}.`,
+                quotation.id
+            );
+        }
+
+        return res.json(quotation);
+    }
+
     // User Management
     static async getAllUsers(req: Request, res: Response) {
         const users = await AppDataSource.getRepository(User).find({

@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -28,25 +34,25 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Visit Our Workshop",
-      content: "123 Auto Street, Car City, CC 12345",
+      content: "L.J. Knowledge Campus, S.G. Highway, Ahmedabad, Gujarat",
       action: "Get Directions"
     },
     {
       icon: Phone,
       title: "Call Us",
-      content: "+1 (555) 123-4567",
+      content: "+91 97262 10000",
       action: "Call Now"
     },
     {
       icon: Mail,
       title: "Email Us",
-      content: "hello@modcar.com",
+      content: "info@ljku.edu.in",
       action: "Send Email"
     },
     {
       icon: Clock,
       title: "Business Hours",
-      content: "Mon-Fri: 8AM-6PM\nSat: 9AM-4PM\nSun: Closed",
+      content: "Mon-Sat: 10AM-5PM\nSun: Closed",
       action: "View Schedule"
     }
   ];
@@ -117,6 +123,40 @@ const Contact = () => {
     }
   ];
 
+  const scrollToForm = () => {
+    const formElement = document.getElementById('contact-form-section');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleAction = (action: string) => {
+    switch (action) {
+      case "Call Now":
+        window.location.href = "tel:+919726210000";
+        break;
+      case "Send Email":
+        window.location.href = "mailto:info@ljku.edu.in";
+        break;
+      case "Get Directions":
+        window.open("https://maps.app.goo.gl/z33J8nNhLcr44rQ76", "_blank");
+        break;
+      case "View Schedule":
+        toast.info("Business Hours: Mon-Sat 10AM-5PM");
+        break;
+      case "Book Consultation":
+        setFormData(prev => ({ ...prev, category: "Project" }));
+        scrollToForm();
+        break;
+      case "Start Chat":
+        scrollToForm();
+        toast("How can we help you today?", {
+          description: "Our team will respond to your message shortly.",
+        });
+        break;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -132,11 +172,20 @@ const Contact = () => {
             Contact us today to discuss your project.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-electric text-lg px-8">
+            <Button
+              size="lg"
+              className="bg-gradient-electric text-lg px-8"
+              onClick={() => handleAction("Start Chat")}
+            >
               <MessageCircle className="w-5 h-5 mr-2" />
               Start Chat
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8">
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8"
+              onClick={() => handleAction("Book Consultation")}
+            >
               <Calendar className="w-5 h-5 mr-2" />
               Book Consultation
             </Button>
@@ -154,7 +203,11 @@ const Contact = () => {
                   <info.icon className="w-12 h-12 text-primary mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">{info.title}</h3>
                   <p className="text-muted-foreground mb-4 whitespace-pre-line">{info.content}</p>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAction(info.action)}
+                  >
                     {info.action}
                   </Button>
                 </CardContent>
@@ -165,7 +218,7 @@ const Contact = () => {
       </AnimatedSection>
 
       {/* Main Contact Section */}
-      <section className="py-16 bg-muted">
+      <section id="contact-form-section" className="py-16 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
 
@@ -297,16 +350,19 @@ const Contact = () => {
                 <CardHeader>
                   <CardTitle>Find Us</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
-                      <p className="text-muted-foreground">Interactive Map</p>
-                      <p className="text-sm text-muted-foreground">123 Auto Street, Car City, CC 12345</p>
-                      <Button variant="outline" size="sm" className="mt-3">
-                        Open in Maps
-                      </Button>
-                    </div>
+                <CardContent className="p-0 overflow-hidden">
+                  <div className="w-full h-[400px]">
+                    <iframe
+                      src="https://maps.google.com/maps?q=LJ+Polytechnic+Ahmedabad&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen={true}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="LJ Polytechnic Map"
+                      className="rounded-b-lg"
+                    ></iframe>
                   </div>
                 </CardContent>
               </Card>
@@ -336,41 +392,55 @@ const Contact = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-display font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-muted-foreground">
-              Quick answers to common questions
-            </p>
-          </div>
+      <section className="py-24 bg-black text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div className="sticky top-32">
+              <h2 className="text-5xl md:text-7xl font-display font-bold leading-tight mb-8">
+                Frequently asked <br />
+                <span className="text-gradient">questions</span>
+              </h2>
+            </div>
 
-          <div className="space-y-6">
-            {[
-              {
-                q: "How long does a typical modification take?",
-                a: "Project timelines vary based on complexity. Simple modifications like wheel changes take 1-2 days, while complete makeovers can take 2-4 weeks."
-              },
-              {
-                q: "Do you provide warranties on your work?",
-                a: "Yes, we provide comprehensive warranties on all our work. Paint jobs come with a 3-year warranty, while parts have manufacturer warranties."
-              },
-              {
-                q: "Can I see my car during the modification process?",
-                a: "Absolutely! We encourage clients to visit and see the progress. We also provide regular photo updates throughout the process."
-              },
-              {
-                q: "Do you work on all car makes and models?",
-                a: "Yes, we work on all makes and models, from economy cars to luxury vehicles and supercars. Our team has experience with every major brand."
-              }
-            ].map((faq, index) => (
-              <Card key={index}>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-2">{faq.q}</h3>
-                  <p className="text-muted-foreground">{faq.a}</p>
-                </CardContent>
-              </Card>
-            ))}
+            <div className="space-y-4">
+              <Accordion type="single" collapsible className="w-full">
+                {[
+                  {
+                    q: "What is the purpose of this website?",
+                    a: "Carvo is your ultimate destination for automotive modifications and high-quality parts. We help car enthusiasts transform their vehicles into masterpieces through expert services and curated products."
+                  },
+                  {
+                    q: "How do I contact support?",
+                    a: "You can contact our support team via the form above, email us at info@ljku.edu.in, or call our direct line during business hours (Mon-Sat, 10AM-5PM)."
+                  },
+                  {
+                    q: "How do I find the best products?",
+                    a: "You can find the best products for your vehicle by browsing our Shop section and using filters for category, performance, and compatibility."
+                  },
+                  {
+                    q: "Can I return a product?",
+                    a: "Yes, we accept returns within 14 days of purchase provided the items are in their original packaging and unused. Check our full Refund Policy for more details."
+                  },
+                  {
+                    q: "Do you offer international shipping?",
+                    a: "Currently, we specialize in high-performance modifications within India. International shipping options for specific parts are coming soon."
+                  },
+                  {
+                    q: "How can I track my order?",
+                    a: "You can track your order by logging into your account and visiting the order history page. You will also receive a tracking number via email once your order has shipped."
+                  }
+                ].map((faq, index) => (
+                  <AccordionItem key={index} value={`item-${index}`} className="border-white/10">
+                    <AccordionTrigger className="text-xl font-medium py-6 hover:no-underline hover:text-primary transition-colors hover:border-none">
+                      {faq.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-lg text-white/70 pb-6 leading-relaxed">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
           </div>
         </div>
       </section>

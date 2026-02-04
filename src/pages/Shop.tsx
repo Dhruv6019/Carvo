@@ -11,6 +11,7 @@ import { Search, ShoppingCart, Filter, Heart, SlidersHorizontal, X } from "lucid
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { useCart } from "@/context/CartContext";
 
 interface Part {
@@ -330,15 +331,15 @@ const Shop = () => {
 
                                         {/* Image Container */}
                                         <div className="w-full aspect-square mb-6 flex items-center justify-center">
-                                            {part.image_url ? (
-                                                <img
+                                            <div className="relative aspect-square">
+                                                <ImageWithFallback
                                                     src={part.image_url}
                                                     alt={part.name}
-                                                    className="w-full h-full object-contain mix-blend-multiply"
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
-                                            ) : (
-                                                <Filter className="w-16 h-16 text-gray-200" />
-                                            )}
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2"></div>
+                                            </div>
+                                            {/* The original fallback for Filter is removed as per the instruction's snippet. */}
                                         </div>
 
                                         {/* Info */}

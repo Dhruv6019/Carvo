@@ -80,7 +80,11 @@ const ProviderDashboard = () => {
                                             </>
                                         )}
                                         {booking.status === 'confirmed' && (
-                                            <Button size="sm" className="bg-blue-500 hover:bg-blue-600" onClick={() => updateStatus(booking.id, 'completed')}>
+                                            <Button size="sm" className="bg-blue-500 hover:bg-blue-600" onClick={() => {
+                                                if (confirm("Confirm service completion? This will process payments and commissions.")) {
+                                                    updateStatus(booking.id, 'completed');
+                                                }
+                                            }}>
                                                 Mark Completed
                                             </Button>
                                         )}

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, OneToMany } from "typeorm";
 import { User } from "./User";
 import { Quotation } from "./Quotation";
 
@@ -43,7 +43,11 @@ export class Booking {
     scheduled_date!: Date;
 
     @Column({ type: "simple-enum", enum: BookingStatus, default: BookingStatus.PENDING })
+    @Column({ type: "simple-enum", enum: BookingStatus, default: BookingStatus.PENDING })
     status!: BookingStatus;
+
+    @OneToMany(() => require("./Payment").Payment, (payment: any) => payment.booking)
+    payments!: any[];
 
     @CreateDateColumn()
     created_at!: Date;

@@ -4,6 +4,7 @@ import { Suspense, useRef, useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import * as THREE from "three";
+import { MessageCircle } from "lucide-react";
 
 // --- Simple Simplex-like Noise function ---
 const p = new Uint8Array(512);
@@ -205,12 +206,35 @@ function SimpleCarModel({ speed }: { speed: number }) {
     );
 }
 
+// --- Aim Line Component ---
+const AimLine = ({ start, end, active }: { start: THREE.Vector3, end: THREE.Vector3, active: boolean }) => {
+    if (!active) return null;
+    return (
+        <line>
+            <bufferGeometry>
+                <bufferAttribute
+                    attach="attributes-position"
+                    count={2}
+                    array={new Float32Array([start.x, start.y, start.z, end.x, end.y, end.z])}
+                    itemSize={3}
+                />
+            </bufferGeometry>
+            <lineBasicMaterial color="#00ffff" linewidth={2} transparent opacity={0.6} />
+        </line>
+    );
+};
+
 // --- Car Controller ---
 const ArcadeCar = ({ setSpeed, setDist }: { setSpeed: (s: number) => void, setDist: (d: number) => void }) => {
     const carRef = useRef<THREE.Group>(null);
     const speed = useRef(0);
     const rotation = useRef(0);
     const keys = useRef<{ [key: string]: boolean }>({});
+
+    // Pull to Play State
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState<THREE.Vector3 | null>(null);
+    const [currentDrag, setCurrentDrag] = useState<THREE.Vector3 | null>(null);
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => (keys.current[e.key.toLowerCase()] = true);
@@ -223,10 +247,36 @@ const ArcadeCar = ({ setSpeed, setDist }: { setSpeed: (s: number) => void, setDi
         };
     }, []);
 
+    const handlePointerDown = (e: any) => {
+        e.stopPropagation();
+        setIsDragging(true);
+        setDragStart(e.point.clone());
+        setCurrentDrag(e.point.clone());
+    };
+
+    const handlePointerMove = (e: any) => {
+        if (!isDragging) return;
+        setCurrentDrag(e.point.clone());
+    };
+
+    const handlePointerUp = () => {
+        if (!isDragging || !dragStart || !currentDrag) return;
+
+        const dragVec = dragStart.clone().sub(currentDrag);
+        const force = dragVec.length() * 15; // Launch power
+
+        // Launch in the direction of the drag (inverted for sling effect)
+        speed.current += force;
+
+        setIsDragging(false);
+        setDragStart(null);
+        setCurrentDrag(null);
+    };
+
     useFrame((state, delta) => {
         if (!carRef.current) return;
 
-        // Controls
+        // Desktop Controls (Optional legacy support)
         const accelMultiplier = keys.current.w ? 60 : keys.current.s ? -50 : 0;
         speed.current += accelMultiplier * delta;
         speed.current *= 0.988; // Slightly less drag for speed feel
@@ -286,11 +336,27 @@ const ArcadeCar = ({ setSpeed, setDist }: { setSpeed: (s: number) => void, setDi
     });
 
     return (
-        <group ref={carRef}>
+        <group
+            ref={carRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+        >
             <Suspense fallback={null}>
                 <SimpleCarModel speed={speed.current} />
                 <ContactShadows position={[0, -0.05, 0]} opacity={0.5} scale={12} blur={2.5} far={1.5} />
             </Suspense>
+
+            {/* Launch Visuals */}
+            {isDragging && dragStart && currentDrag && (
+                <AimLine
+                    start={new THREE.Vector3(0, 0.5, 0)}
+                    end={dragStart.clone().sub(currentDrag).multiplyScalar(0.5)}
+                    active={true}
+                />
+            )}
+
             {/* Dynamic Headlight beam */}
             <pointLight intensity={10} color="#ffffff" position={[0, 0.6, 2.5]} distance={15} />
             <spotLight color="#fff" intensity={speed.current > 5 ? 300 : 150} distance={80} angle={0.5} position={[0, 0.8, 2]} target-position={[0, 0, 30]} castShadow />
@@ -422,6 +488,17 @@ const Game = () => {
                             <span className="text-[10px] uppercase font-bold opacity-40 tracking-widest">Odometer Track</span>
                             <span className="text-2xl font-mono font-black tracking-tight text-green-50/90">{(dist / 1000).toFixed(2)} <span className="text-xs opacity-40">KM</span></span>
                         </div>
+                    </div>
+                </div>
+
+                {/* Pull to Play Instruction */}
+                <div className="mt-6 flex items-center space-x-4 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl animate-pulse">
+                    <div className="p-2 bg-electric-blue/20 rounded-lg">
+                        <MessageCircle className="w-4 h-4 text-electric-blue" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] uppercase tracking-widest font-bold text-electric-blue">Game Mechanic</p>
+                        <p className="text-xs text-white/60">Click and drag the car backward to launch it!</p>
                     </div>
                 </div>
             </div>

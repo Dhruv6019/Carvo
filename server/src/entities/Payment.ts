@@ -26,6 +26,12 @@ export class Payment {
     @Column({ nullable: true })
     bookingId!: number;
 
+    @ManyToOne(() => require("./Quotation").Quotation, { nullable: true })
+    quotation!: any;
+
+    @Column({ nullable: true })
+    quotationId!: number;
+
     @Column("decimal", { precision: 10, scale: 2 })
     amount!: number;
 

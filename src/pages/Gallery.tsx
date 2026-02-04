@@ -1,14 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "@/lib/api";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 import { Eye, Heart, Share2, Filter } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
 
 const Gallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+
+
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const res = await api.get("/gallery");
+        setProjects(res.data);
+      } catch (error) {
+        console.error("Failed to load gallery");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
 
   const categories = [
     { id: "all", name: "All Projects" },
@@ -17,69 +38,6 @@ const Gallery = () => {
     { id: "interior", name: "Interior" },
     { id: "performance", name: "Performance" },
     { id: "lighting", name: "LED Lighting" },
-  ];
-
-  const projects = [
-    {
-      id: 1,
-      title: "Matte Black BMW M3",
-      category: "paint",
-      image: "/placeholder.svg",
-      client: "John D.",
-      likes: 234,
-      views: 1200,
-      tags: ["Matte Black", "Carbon Fiber", "Sport Package"]
-    },
-    {
-      id: 2,
-      title: "Red Chrome Ferrari 488",
-      category: "paint",
-      image: "/placeholder.svg",
-      client: "Sarah M.",
-      likes: 189,
-      views: 890,
-      tags: ["Chrome Red", "Ceramic Coating", "Performance"]
-    },
-    {
-      id: 3,
-      title: "Custom 22\" Forged Wheels",
-      category: "wheels",
-      image: "/placeholder.svg",
-      client: "Mike R.",
-      likes: 156,
-      views: 670,
-      tags: ["Forged", "22 Inch", "Custom Design"]
-    },
-    {
-      id: 4,
-      title: "Luxury Interior Upgrade",
-      category: "interior",
-      image: "/placeholder.svg",
-      client: "Lisa K.",
-      likes: 298,
-      views: 1450,
-      tags: ["Leather", "Alcantara", "Custom Stitching"]
-    },
-    {
-      id: 5,
-      title: "Turbo Performance Kit",
-      category: "performance",
-      image: "/placeholder.svg",
-      client: "David P.",
-      likes: 312,
-      views: 1800,
-      tags: ["Turbo", "ECU Tune", "Cold Air Intake"]
-    },
-    {
-      id: 6,
-      title: "RGB Underglow System",
-      category: "lighting",
-      image: "/placeholder.svg",
-      client: "Alex C.",
-      likes: 87,
-      views: 420,
-      tags: ["RGB", "Underglow", "App Control"]
-    }
   ];
 
   const filteredProjects = selectedCategory === "all"
@@ -128,10 +86,10 @@ const Gallery = () => {
             {filteredProjects.map((project, index) => (
               <Card key={project.id} className="group hover:shadow-xl hover-lift transition-all duration-500 overflow-hidden animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="relative">
-                  <img
-                    src={project.image}
+                  <ImageWithFallback
+                    src={project.imageUrl || project.image}
                     alt={project.title}
-                    className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="h-64 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="flex gap-2">

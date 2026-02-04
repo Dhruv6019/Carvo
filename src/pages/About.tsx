@@ -5,39 +5,62 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Award, Wrench, Clock, Target, Star } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { LayoutTextFlip } from "@/components/ui/layout-text-flip";
+import { useNavigate } from "react-router-dom";
 
 const About = () => {
+  const navigate = useNavigate();
   const stats = [
-    { icon: Users, number: "5000+", label: "Happy Customers" },
-    { icon: Wrench, number: "15000+", label: "Modifications Done" },
-    { icon: Award, number: "50+", label: "Awards Won" },
-    { icon: Clock, number: "8", label: "Years Experience" },
+    { icon: Users, number: "7", label: "Team Members" },
+    { icon: Wrench, number: "1", label: "Unified Platform" },
+    { icon: Award, number: "2025-26", label: "Project Year" },
+    { icon: Clock, number: "24/7", label: "Innovation" },
   ];
 
   const team = [
     {
-      name: "Alex Rodriguez",
-      role: "Founder & CEO",
-      image: "/placeholder.svg",
-      bio: "15+ years in automotive industry, passionate about innovation"
+      name: "MEET SADARIYA",
+      role: "23012250410277",
+      image: "/meet-sadariya.png",
+      bio: "Information Technology Student"
     },
     {
-      name: "Sarah Chen",
-      role: "Lead Designer",
-      image: "/placeholder.svg",
-      bio: "Award-winning designer specializing in luxury car aesthetics"
+      name: "MEHUL SHARMA",
+      role: "23012250410302",
+      image: "/mehul-sharma_v2.png",
+      bio: "Information Technology Student"
     },
     {
-      name: "Mike Johnson",
-      role: "Technical Director",
-      image: "/placeholder.svg",
-      bio: "Former F1 engineer, expert in performance modifications"
+      name: "JAINAM SOLANKI",
+      role: "23012250410309",
+      image: "/jainam-solanki.png",
+      bio: "Information Technology Student"
     },
     {
-      name: "Lisa Park",
-      role: "Customer Success",
-      image: "/placeholder.svg",
-      bio: "Ensuring every customer gets their dream car transformation"
+      name: "KRISH SUTHAR",
+      role: "23012250410320",
+      image: "/krish-suthar.png",
+      bio: "Information Technology Student"
+    },
+    {
+      name: "KRISHNA TANK",
+      role: "23012250410322",
+      image: "/krishna-tank.png",
+      bio: "Information Technology Student"
+    },
+    {
+      name: "DHRUV TELI",
+      role: "23012250410323",
+      image: "/dhruv-teli.png",
+      bio: "Information Technology Student"
+    },
+    {
+      name: "MANAN TIWARI",
+      role: "23012250410330",
+      image: "/manan_v4.png",
+      bio: "Information Technology Student"
     }
   ];
 
@@ -55,7 +78,7 @@ const About = () => {
     {
       icon: Users,
       title: "Trust",
-      description: "Built on years of trust and thousands of successful transformations."
+      description: "Built on trust and many of successful transformations."
     }
   ];
 
@@ -68,20 +91,29 @@ const About = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl md:text-6xl font-display font-bold mb-6">
-                Crafting <span className="text-gradient">Dreams</span> Since 2016
-              </h1>
+              <div className="text-4xl md:text-6xl font-display font-bold mb-6 flex flex-wrap items-center gap-x-3">
+                <LayoutTextFlip
+                  text="Crafting "
+                  words={["Dreams", "Vision", "Reality", "Future"]}
+                  className="md:text-6xl text-4xl"
+                />
+                <span>Since 2023</span>
+              </div>
               <p className="text-xl text-muted-foreground mb-8">
                 We are passionate automotive artisans who transform ordinary vehicles into extraordinary masterpieces.
                 Every project is a canvas for innovation, precision, and uncompromising quality.
               </p>
-              <Button size="lg" className="bg-gradient-electric text-lg px-8">
+              <Button
+                size="lg"
+                className="bg-gradient-electric text-lg px-8 shadow-lg hover:shadow-xl transition-all"
+                onClick={() => navigate('/contact')}
+              >
                 Get Your Quote
               </Button>
             </div>
             <div className="relative">
-              <img
-                src="/placeholder.svg"
+              <ImageWithFallback
+                src="/about-hero-v2.png"
                 alt="Our Workshop"
                 className="rounded-2xl shadow-2xl"
               />
@@ -89,8 +121,8 @@ const About = () => {
                 <div className="flex items-center gap-3">
                   <Award className="w-8 h-8 text-primary" />
                   <div>
-                    <p className="font-semibold">Industry Leaders</p>
-                    <p className="text-sm text-muted-foreground">In car modification</p>
+                    <p className="font-semibold">Student Innovation</p>
+                    <p className="text-sm text-muted-foreground">LJ Polytechnic</p>
                   </div>
                 </div>
               </div>
@@ -118,28 +150,25 @@ const About = () => {
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Our Story</h2>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Our Journey</h2>
             <p className="text-xl text-muted-foreground">
-              From a small garage to industry leaders
+              From concept to a comprehensive car modification platform
             </p>
           </div>
 
-          <div className="prose prose-lg max-w-none text-muted-foreground">
-            <p className="text-lg leading-relaxed mb-6">
-              It all started in 2016 when our founder, Alex Rodriguez, transformed his first car in a small garage.
-              What began as a passion project quickly evolved into something much bigger when friends and neighbors
-              started asking for similar transformations.
-            </p>
-            <p className="text-lg leading-relaxed mb-6">
-              Today, we've grown into one of the most trusted names in car modification, serving thousands of
-              customers across the country. Our team combines traditional craftsmanship with cutting-edge
-              technology to deliver results that exceed expectations.
-            </p>
-            <p className="text-lg leading-relaxed">
-              Every car that comes through our doors is treated as a unique canvas. We don't just modify cars;
-              we bring visions to life, create memories, and help our customers express their personality
-              through their vehicles.
-            </p>
+          <div className="max-w-none text-muted-foreground">
+            <TextGenerateEffect
+              words="Carvo represents the culmination of our academic journey at L.J. Polytechnic. Conceived as a final year project in the Department of Information Technology, it reflects our collective passion for technology, design, and automotive culture."
+              className="text-lg md:text-xl leading-8 mb-8 font-light tracking-wide text-gray-600 dark:text-gray-300"
+            />
+            <TextGenerateEffect
+              words="Our mission was to create a digital ecosystem that streamlines the car modification industry. By integrating 3D visualization, seamless booking management, and a curated marketplace, we aim to demonstrate how technology can elevate the user experience in the automotive world."
+              className="text-lg md:text-xl leading-8 mb-8 font-light tracking-wide text-gray-600 dark:text-gray-300"
+            />
+            <TextGenerateEffect
+              words="This platform stands as a testament to our technical skills, teamwork, and innovation. It is not just a project; it is a showcase of what determines students can build when they combine their knowledge with creativity."
+              className="text-lg md:text-xl leading-8 font-light tracking-wide text-gray-600 dark:text-gray-300"
+            />
           </div>
         </div>
       </section>
@@ -182,7 +211,7 @@ const About = () => {
             {team.map((member, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
-                  <img
+                  <ImageWithFallback
                     src={member.image}
                     alt={member.name}
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
@@ -194,6 +223,24 @@ const About = () => {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* University / Department Section */}
+      <section className="py-16 bg-muted text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex justify-center">
+            <div className="w-40 h-40 flex items-center justify-center">
+              <ImageWithFallback
+                src="/lj-logo.png"
+                alt="LJ Polytechnic Logo"
+                className="w-full h-full object-contain drop-shadow-lg"
+              />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold uppercase tracking-wider mb-2">Department of Information Technology</h3>
+          <h4 className="text-xl font-semibold text-muted-foreground uppercase mb-4">L.J. Polytechnic, Ahmedabad</h4>
+          <p className="text-lg font-mono text-electric-blue">2025-26</p>
         </div>
       </section>
 

@@ -108,6 +108,14 @@ export class OrderController {
                 );
             }
 
+            // ✅ Notify Admins
+            await NotificationService.notifyAllAdmins(
+                NotificationType.ORDER_UPDATE,
+                "New Order Placed",
+                `New Order #${order.id} placed by ${userEmail}. Total: $${order.final_amount}`,
+                order.id
+            );
+
             console.log(`🛒 Order ${order.id} created for user ${userId}, notifications sent to customer and ${sellerIds.size} seller(s)`);
 
             return res.status(201).json(order);
